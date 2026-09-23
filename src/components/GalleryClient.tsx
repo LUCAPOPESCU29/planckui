@@ -16,7 +16,23 @@ const ALL: WidgetDef[] = [...LIVE_WIDGETS, ...WIDGETS.filter((w) => w.status ===
 
 export function GalleryClient() {
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState<string>("all");
+  const [cat, setCat] = useState<string>(() => {
+    // deep link: /gallery?category=mac (or any category id)
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("category");
+      if (p && (p === "all" || CATEGORIES.some((c) => c.id === p))) return p;
+    }
+    return "all";
+  });
+
+  // keep the URL shareable when the filter changes
+  const setCatUrl = (id: string) => {
+    setCat(id);
+    if (typeof window !== "undefined") {
+      const url = id === "all" ? window.location.pathname : window.location.pathname + "?category=" + id;
+      window.history.replaceState(null, "", url);
+    }
+  };
 
   const qn = q.trim().toLowerCase();
   const matches = (w: WidgetDef) =>
@@ -34,11 +50,11 @@ export function GalleryClient() {
           aria-label="Search widgets"
         />
         <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
-          <Chip active={cat === "all"} onClick={() => setCat("all")}>
+          <Chip active={cat === "all"} onClick={() => setCatUrl("all")}>
             All
           </Chip>
           {CATEGORIES.map((c) => (
-            <Chip key={c.id} active={cat === c.id} onClick={() => setCat(c.id)}>
+            <Chip key={c.id} active={cat === c.id} onClick={() => setCatUrl(c.id)}>
               {c.name}
             </Chip>
           ))}
