@@ -55,7 +55,7 @@ const PL_CSS = `
 
 
 /* real brand marks (simple-icons geometry), letter chip as fallback */
-const MARKS: Record<string, string> = {
+export const MARKS: Record<string, string> = {
   microsoft:
     '<svg viewBox="0 0 23 23" width="20" height="20" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="#f25022"/><rect x="12" y="1" width="10" height="10" fill="#7fba00"/><rect x="1" y="12" width="10" height="10" fill="#00a4ef"/><rect x="12" y="12" width="10" height="10" fill="#ffb900"/></svg>',
   gmail:
