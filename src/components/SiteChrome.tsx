@@ -25,6 +25,9 @@ export function SiteNav() {
             <Link href="/animations" className="transition-colors hover:text-ink">
               Animations
             </Link>
+            <Link href="/blocks" className="transition-colors hover:text-ink">
+              Blocks
+            </Link>
             <Link href="/#pricing" className="transition-colors hover:text-ink">
               Pricing
             </Link>
