@@ -28,6 +28,19 @@ export function LoginForm() {
     router.refresh();
   }
 
+  async function guest() {
+    setBusy(true);
+    setError(null);
+    const res = await fetch("/api/auth/guest", { method: "POST" });
+    if (!res.ok) {
+      setError("Something went wrong. Try again.");
+      setBusy(false);
+      return;
+    }
+    router.push("/dashboard");
+    router.refresh();
+  }
+
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div>
@@ -53,9 +66,17 @@ export function LoginForm() {
       <button type="submit" className="btn btn-primary" disabled={busy}>
         {busy ? "Opening…" : "Open my workspace"}
       </button>
+      <div className="flex items-center gap-3 text-xs text-ink-3">
+        <span className="h-px flex-1 bg-[var(--line)]" />
+        or
+        <span className="h-px flex-1 bg-[var(--line)]" />
+      </div>
+      <button type="button" className="btn btn-ghost" onClick={guest} disabled={busy}>
+        Skip — open a guest workspace
+      </button>
       <p className="text-sm text-ink-3">
-        Demo sign-in: any email works. Your workspace arrives with sample data you can keep,
-        edit or delete — so nothing is ever an empty screen.
+        Email is optional. Guests get the whole app — every widget, every block, no
+        email asked. Add one later only if you want this workspace saved to it.
       </p>
     </form>
   );

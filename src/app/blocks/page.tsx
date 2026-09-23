@@ -92,6 +92,240 @@ const CheckIcon = () => <Icon d="M4 10.5l4 4L16 6" />;
 /* ---------------------------------------------------------------- chrome
    Section scaffolding for the showcase page itself. */
 
+/* Self-contained export: fonts, the Tailwind browser build (compiles the
+   utility classes at runtime — no install), the token @theme mapping, and
+   every custom class the blocks use, scoped under .plk-scope so nothing
+   leaks into the host page. Light tokens by default; hosts that add the
+   `dark` class on the wrapper get the dark set. */
+const FONT_LINK =
+  "https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Golos+Text:wght@400;500;600&family=Geist+Mono&display=swap";
+
+const TAILWIND_THEME = `@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-code);
+}`;
+
+const EXPORT_CSS = `
+.plk-scope {
+  --bg: oklch(0.985 0.004 205);
+  --surface: oklch(0.997 0.003 205);
+  --surface-2: oklch(0.96 0.006 205);
+  --ink: oklch(0.25 0.02 225);
+  --ink-2: oklch(0.42 0.02 218);
+  --ink-3: oklch(0.55 0.018 212);
+  --line: oklch(0.9 0.008 205);
+  --line-2: oklch(0.85 0.012 205);
+  --accent: oklch(0.47 0.1 203);
+  --accent-strong: oklch(0.4 0.1 203);
+  --accent-soft: oklch(0.955 0.02 203);
+  --accent-ink: oklch(0.98 0.01 200);
+  --ok: oklch(0.5 0.1 155);
+  --shadow-sm: 0 1px 2px oklch(0.25 0.02 225 / 0.06);
+  --shadow-md: 0 1px 2px oklch(0.25 0.02 225 / 0.05), 0 4px 12px oklch(0.25 0.02 225 / 0.06);
+  --shadow-lg: 0 2px 4px oklch(0.25 0.02 225 / 0.05), 0 16px 40px oklch(0.25 0.02 225 / 0.12);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --font-display: "Archivo";
+  --font-body: "Golos Text";
+  --font-code: "Geist Mono";
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.plk-scope.dark {
+  --bg: oklch(0.175 0.012 222);
+  --surface: oklch(0.215 0.014 220);
+  --surface-2: oklch(0.25 0.016 218);
+  --ink: oklch(0.93 0.008 200);
+  --ink-2: oklch(0.75 0.012 205);
+  --ink-3: oklch(0.62 0.015 208);
+  --line: oklch(0.3 0.016 218);
+  --line-2: oklch(0.37 0.018 216);
+  --accent: oklch(0.78 0.085 197);
+  --accent-strong: oklch(0.84 0.08 197);
+  --accent-soft: oklch(0.28 0.03 205);
+  --accent-ink: oklch(0.2 0.03 220);
+  --ok: oklch(0.75 0.1 158);
+  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.3);
+  --shadow-md: 0 1px 2px oklch(0 0 0 / 0.25), 0 4px 12px oklch(0 0 0 / 0.3);
+  --shadow-lg: 0 2px 4px oklch(0 0 0 / 0.3), 0 16px 40px oklch(0 0 0 / 0.45);
+  line-height: 1.62;
+}
+.plk-scope h1, .plk-scope h2, .plk-scope h3, .plk-scope h4 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+}
+.plk-scope ::selection { background: var(--accent); color: var(--accent-ink); }
+.plk-scope :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.plk-scope .blocks-canvas {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--line); border-radius: 20px; background: var(--surface);
+}
+.plk-scope .blocks-canvas--tinted { background: linear-gradient(180deg, var(--surface-2), var(--surface) 65%); }
+.plk-scope .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 500; font-size: 0.9375rem; line-height: 1;
+  padding: 0.6875rem 1.125rem; border-radius: var(--radius-md);
+  border: 1px solid transparent; cursor: pointer; user-select: none; white-space: nowrap;
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+.plk-scope .btn:active { transform: scale(0.97); }
+.plk-scope .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.plk-scope .btn-primary { background: var(--ink); color: var(--bg); }
+.plk-scope .btn-primary:hover { background: var(--accent-strong); }
+.plk-scope .btn-accent { background: var(--accent); color: var(--accent-ink); }
+.plk-scope .btn-accent:hover { background: var(--accent-strong); }
+.plk-scope .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-2); }
+.plk-scope .btn-ghost:hover { border-color: var(--ink-3); background: var(--surface-2); }
+.plk-scope .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.plk-scope .input {
+  width: 100%; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line-2); border-radius: var(--radius-md);
+  padding: 0.625rem 0.75rem; font: inherit; font-size: 0.9375rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.plk-scope .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.plk-scope .input::placeholder { color: var(--ink-3); }
+.plk-scope .label { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--ink-2); margin-bottom: 0.375rem; }
+.plk-scope .glass-pill {
+  display: inline-flex; align-items: center; gap: 0.375rem;
+  padding: 0.375rem 0.375rem 0.375rem 1rem; border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--line-2) 80%, transparent);
+  background: color-mix(in oklab, var(--surface) 62%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+  box-shadow: var(--shadow-md);
+}
+.plk-scope .glow {
+  position: absolute; width: 520px; height: 520px; border-radius: 50%;
+  background: var(--accent); opacity: 0.13; filter: blur(80px); pointer-events: none;
+}
+.plk-scope .dotgrid {
+  background-image: radial-gradient(color-mix(in oklab, var(--ink) 16%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 20%, #000 25%, transparent 72%);
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 20%, #000 25%, transparent 72%);
+  pointer-events: none;
+}
+.plk-scope .spot { position: relative; overflow: hidden; }
+.plk-scope .spot-light {
+  position: absolute; top: 0; left: 0; width: 460px; height: 460px; border-radius: 50%;
+  pointer-events: none; opacity: 0;
+  transform: translate(calc(var(--x, 50%) - 50%), calc(var(--y, 50%) - 50%));
+  background: radial-gradient(circle, color-mix(in oklab, var(--accent) 9%, transparent), transparent 65%);
+  transition: opacity 240ms var(--ease-out);
+}
+.plk-scope .spot:hover .spot-light { opacity: 1; }
+.plk-scope .spot:hover { border-color: var(--line-2); }
+@keyframes plk-float {
+  0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+  50% { transform: translateY(-8px) rotate(-0.6deg); }
+}
+.plk-scope .float-slow { animation: plk-float 7s ease-in-out infinite; }
+.plk-scope .seg {
+  position: relative; display: inline-flex; padding: 3px;
+  border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line);
+}
+.plk-scope .seg-thumb {
+  position: absolute; top: 3px; bottom: 3px; border-radius: 999px;
+  background: var(--surface); box-shadow: var(--shadow-sm), 0 0 0 1px var(--line);
+}
+.plk-scope .seg > button {
+  position: relative; z-index: 1; border-radius: 999px; padding: 0.4375rem 1rem;
+  font-size: 0.8125rem; font-weight: 500; color: var(--ink-3); background: none; border: none; cursor: pointer;
+}
+.plk-scope .seg > button[aria-pressed="true"] { color: var(--ink); }
+@keyframes plk-price-in { from { opacity: 0; transform: translateY(6px); } }
+.plk-scope .price-in { animation: plk-price-in 220ms var(--ease-out); }
+.plk-scope .cta-dark {
+  background:
+    radial-gradient(120% 90% at 50% -20%, color-mix(in oklab, var(--accent) 26%, transparent), transparent 60%),
+    var(--ink);
+  color: var(--bg);
+}
+.plk-scope .mq { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.plk-scope .mq-track { display: flex; gap: 3rem; width: max-content; animation: plk-mq 60s linear infinite; }
+.plk-scope .mq:hover .mq-track { animation-play-state: paused; }
+.plk-scope .mq-group { display: flex; gap: 3rem; padding-right: 3rem; align-items: baseline; }
+@keyframes plk-mq { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .plk-scope *, .plk-scope *::before, .plk-scope *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}`;
+
+function buildBlockExport(canvas: HTMLElement, label: string): string {
+  const clone = canvas.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("[data-demo-only]").forEach((el) => el.remove());
+  const origin = typeof location !== "undefined" ? location.origin : "";
+  clone.querySelectorAll('a[href^="/"]').forEach((a) => {
+    const href = a.getAttribute("href");
+    if (href) a.setAttribute("href", origin + href);
+  });
+  return `<!-- PlanckUi block: ${label} — free to use on any site, no account, no attribution. -->
+<link rel="stylesheet" href="${FONT_LINK}">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style type="text/tailwindcss">
+${TAILWIND_THEME}
+</style>
+<style>${EXPORT_CSS}
+</style>
+<div class="plk-scope">
+${clone.outerHTML}
+</div>`;
+}
+
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    ta.remove();
+    return ok;
+  }
+}
+
 function SectionBlock({
   id,
   tag,
@@ -107,6 +341,18 @@ function SectionBlock({
   children: React.ReactNode;
   tinted?: boolean;
 }) {
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copyHtml() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ok = await copyText(buildBlockExport(canvas, `${tag} · ${title}`));
+    if (!ok) return;
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 2400);
+  }
+
   return (
     <section id={id} className="mx-auto w-full max-w-6xl scroll-mt-20 px-6 py-14 md:py-20">
       <Reveal>
@@ -116,9 +362,21 @@ function SectionBlock({
             <h2 className="font-display text-xl font-semibold">{title}</h2>
             <p className="mt-0.5 text-sm text-ink-3">{desc}</p>
           </div>
+          <span className="flex-1" />
+          <span aria-live="polite">
+            <button
+              type="button"
+              onClick={copyHtml}
+              className="btn btn-ghost btn-sm rounded-full"
+            >
+              {copied ? "Copied — paste it into your site" : "Copy HTML"}
+            </button>
+          </span>
         </div>
       </Reveal>
-      <div className={`blocks-canvas ${tinted ? "blocks-canvas--tinted" : ""}`}>{children}</div>
+      <div ref={canvasRef} className={`blocks-canvas ${tinted ? "blocks-canvas--tinted" : ""}`}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -148,7 +406,7 @@ function NavDemo() {
           </button>
         </nav>
       </Reveal>
-      <p className="absolute inset-x-0 bottom-5 text-center text-xs text-ink-3">
+      <p data-demo-only className="absolute inset-x-0 bottom-5 text-center text-xs text-ink-3">
         Blur and saturation on the functional layer only — content beneath stays crisp.
       </p>
     </div>
@@ -796,8 +1054,10 @@ export default function BlocksPage() {
           <Reveal delay={45}>
             <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-2">
               Ten sections inspired by the shadcn block library, re-tuned through
-              PlanckUi&apos;s design law with a little Apple in the glass. Every block is
-              animated with intent and free to copy.
+              PlanckUi&apos;s design law with a little Apple in the glass. Hit
+              <b className="font-medium text-ink"> Copy HTML </b> on any block and paste it
+              straight into your site — no account, no email, nothing to install. The
+              widgets are the same: open the app and a guest workspace is waiting.
             </p>
           </Reveal>
           <Reveal delay={90}>
@@ -912,8 +1172,8 @@ export default function BlocksPage() {
             <div className="card p-8 text-center">
               <h2 className="font-display text-2xl font-semibold">Take one with you.</h2>
               <p className="mx-auto mt-3 max-w-lg text-ink-2">
-                Every block above is tokenized and dependency-free. Or start from a widget —
-                280 of them, all free.
+                Copy any block above as HTML, or start from a widget — 280 of them, all
+                free, no email required.
               </p>
               <div className="mt-6 flex justify-center gap-3">
                 <Link href="/gallery" className="btn btn-primary">

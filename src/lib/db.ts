@@ -10,7 +10,8 @@ import type { WidgetConfig } from "./widgets/types";
 
 export interface User {
   id: string;
-  email: string;
+  /* null = guest workspace: everything works, no email asked for */
+  email: string | null;
   createdAt: string;
 }
 export interface Collection {
@@ -90,16 +91,27 @@ export function getUser(id: string): User | undefined {
   return read().users.find((u) => u.id === id);
 }
 
-export function createUser(email: string): User {
+export function createUser(email: string | null): User {
   const db = read();
   const user: User = {
     id: uid(),
-    email: email.toLowerCase().trim(),
+    email: email ? email.toLowerCase().trim() : null,
     createdAt: new Date().toISOString(),
   };
   db.users.push(user);
   write(db);
   seedForUser(user.id);
+  return user;
+}
+
+/* Claim a guest workspace: attach an email after the fact, turning it into a
+   regular account without touching its widgets or collections. */
+export function setUserEmail(id: string, email: string): User | undefined {
+  const db = read();
+  const user = db.users.find((u) => u.id === id);
+  if (!user) return undefined;
+  user.email = email.toLowerCase().trim();
+  write(db);
   return user;
 }
 

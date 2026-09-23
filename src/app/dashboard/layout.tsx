@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 import { Wordmark } from "@/components/SiteChrome";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GuestBar } from "@/components/GuestBar";
 import { requireUser } from "@/lib/auth";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  await requireUser();
+  const user = await requireUser();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-20 border-b border-line" style={{ background: "var(--bg)" }}>
@@ -36,6 +37,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           </div>
         </div>
       </header>
+      {user.email === null && <GuestBar />}
       <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">{children}</main>
     </div>
   );
