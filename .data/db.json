@@ -1,0 +1,200 @@
+{
+  "users": [
+    {
+      "id": "001132db-cd4",
+      "email": "luca@example.com",
+      "createdAt": "2026-09-22T08:34:55.844Z"
+    },
+    {
+      "id": "213d126a-645",
+      "email": "lucapopescu353@gmail.com",
+      "createdAt": "2026-09-22T09:50:58.671Z"
+    }
+  ],
+  "collections": [
+    {
+      "id": "3af82536-e66",
+      "userId": "001132db-cd4",
+      "name": "Customer love",
+      "slug": "customer-love-001132db-cd4",
+      "createdAt": "2026-09-22T08:34:55.853Z"
+    },
+    {
+      "id": "41dc917b-605",
+      "userId": "213d126a-645",
+      "name": "Customer love",
+      "slug": "customer-love-213d126a-645",
+      "createdAt": "2026-09-22T09:50:58.680Z"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "20631183-3db",
+      "collectionId": "3af82536-e66",
+      "author": "Maya Okafor",
+      "role": "Founder, Fern & Co.",
+      "rating": 5,
+      "text": "I replaced a $25/month subscription with this in one afternoon. Pasted the snippet, and the wall of love just appeared on my homepage. Still slightly annoyed at how easy it was.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-22T08:34:55.853Z"
+    },
+    {
+      "id": "ede43556-5a1",
+      "collectionId": "3af82536-e66",
+      "author": "Tomás Rivera",
+      "role": "Runs a bike repair shop",
+      "rating": 5,
+      "text": "Customers started mentioning the reviews on my site. One said it was the reason she trusted me with her frame repair. That call paid for the year, which is funny, because the year was free.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-21T08:34:55.853Z"
+    },
+    {
+      "id": "5cc56d8b-d9a",
+      "collectionId": "3af82536-e66",
+      "author": "June Park",
+      "role": "Illustrator",
+      "rating": 4,
+      "text": "The collection form is better than the one I was paying for. Clients record a short video right in the browser and I approve it from my phone. Only wish the video files were smaller.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-20T08:34:55.853Z"
+    },
+    {
+      "id": "6c819783-e1b",
+      "collectionId": "3af82536-e66",
+      "author": "Ade Balogun",
+      "role": "CTO, Lattice Labs",
+      "rating": 5,
+      "text": "The embed script is 9 KB, renders in a shadow root, and caused zero layout shift on a page I am scored on. This is how embeds should have worked all along.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-19T08:34:55.853Z"
+    },
+    {
+      "id": "39abb40e-c8f",
+      "collectionId": "3af82536-e66",
+      "author": "Sofia Lindqvist",
+      "role": "Bakery owner",
+      "rating": 5,
+      "text": "I am not a technical person. I copied the code, pasted it, and asked my nephew if it looked broken. It did not. The cake reviews look lovely.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-18T08:34:55.853Z"
+    },
+    {
+      "id": "13b62e4c-66e",
+      "collectionId": "3af82536-e66",
+      "author": "Daniel Weiss",
+      "role": "Indie hacker",
+      "rating": 4,
+      "text": "Shipped my landing page with the marquee and the rating badge. Two widgets, ten minutes, zero dollars. The paid tool I removed had worse defaults.",
+      "status": "pending",
+      "tags": [],
+      "createdAt": "2026-09-17T08:34:55.853Z"
+    },
+    {
+      "id": "190362a0-71c",
+      "collectionId": "41dc917b-605",
+      "author": "Maya Okafor",
+      "role": "Founder, Fern & Co.",
+      "rating": 5,
+      "text": "I replaced a $25/month subscription with this in one afternoon. Pasted the snippet, and the wall of love just appeared on my homepage. Still slightly annoyed at how easy it was.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-22T09:50:58.680Z"
+    },
+    {
+      "id": "634c90f2-498",
+      "collectionId": "41dc917b-605",
+      "author": "Tomás Rivera",
+      "role": "Runs a bike repair shop",
+      "rating": 5,
+      "text": "Customers started mentioning the reviews on my site. One said it was the reason she trusted me with her frame repair. That call paid for the year, which is funny, because the year was free.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-21T09:50:58.680Z"
+    },
+    {
+      "id": "d6ecc07c-f60",
+      "collectionId": "41dc917b-605",
+      "author": "June Park",
+      "role": "Illustrator",
+      "rating": 4,
+      "text": "The collection form is better than the one I was paying for. Clients record a short video right in the browser and I approve it from my phone. Only wish the video files were smaller.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-20T09:50:58.680Z"
+    },
+    {
+      "id": "8590809b-e82",
+      "collectionId": "41dc917b-605",
+      "author": "Ade Balogun",
+      "role": "CTO, Lattice Labs",
+      "rating": 5,
+      "text": "The embed script is 9 KB, renders in a shadow root, and caused zero layout shift on a page I am scored on. This is how embeds should have worked all along.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-19T09:50:58.680Z"
+    },
+    {
+      "id": "6476f155-038",
+      "collectionId": "41dc917b-605",
+      "author": "Sofia Lindqvist",
+      "role": "Bakery owner",
+      "rating": 5,
+      "text": "I am not a technical person. I copied the code, pasted it, and asked my nephew if it looked broken. It did not. The cake reviews look lovely.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-18T09:50:58.680Z"
+    },
+    {
+      "id": "74efe670-46e",
+      "collectionId": "41dc917b-605",
+      "author": "Daniel Weiss",
+      "role": "Indie hacker",
+      "rating": 4,
+      "text": "Shipped my landing page with the marquee and the rating badge. Two widgets, ten minutes, zero dollars. The paid tool I removed had worse defaults.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-17T09:50:58.680Z"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "bd082aa2-29d",
+      "userId": "001132db-cd4",
+      "type": "wall-of-love",
+      "name": "Homepage wall",
+      "collectionId": "3af82536-e66",
+      "config": {
+        "theme": "light",
+        "accent": "oklch(0.47 0.1 203)",
+        "radius": 12,
+        "density": "cozy",
+        "showBadge": true,
+        "variant": "masonry",
+        "maxWidth": 880
+      },
+      "createdAt": "2026-09-22T08:34:55.853Z"
+    },
+    {
+      "id": "98f0e816-e5a",
+      "userId": "213d126a-645",
+      "type": "wall-of-love",
+      "name": "Homepage wall",
+      "collectionId": "41dc917b-605",
+      "config": {
+        "theme": "light",
+        "accent": "oklch(0.47 0.1 203)",
+        "radius": 12,
+        "density": "cozy",
+        "showBadge": true,
+        "variant": "masonry",
+        "maxWidth": 880
+      },
+      "createdAt": "2026-09-22T09:50:58.680Z"
+    }
+  ]
+}
