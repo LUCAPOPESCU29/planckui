@@ -97,7 +97,7 @@ function markFor(brand: string): string {
 }
 
 const MARK_ALIAS: Record<string, string> = { ms: "microsoft", gdrive: "drive" };
-function chipMark(brand: string, size = 22): string {
+export function chipMark(brand: string, size = 22): string {
   const key = MARK_ALIAS[brand] || brand;
   return brandSvg(key, size) || MARKS[key] || markFor(key);
 }
