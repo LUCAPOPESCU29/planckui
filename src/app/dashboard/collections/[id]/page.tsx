@@ -17,10 +17,10 @@ export default async function CollectionPage({
 }) {
   const { id } = await params;
   const user = await requireUser();
-  const col = getCollection(id);
+  const col = await getCollection(id);
   if (!col || col.userId !== user.id) notFound();
 
-  const all = testimonialsFor(col.id);
+  const all = await testimonialsFor(col.id);
   const toInbox = (t: (typeof all)[number]) => ({
     id: t.id,
     author: t.author,
@@ -32,7 +32,7 @@ export default async function CollectionPage({
   });
   const pending = all.filter((t) => t.status === "pending").map(toInbox);
   const approved = all.filter((t) => t.status === "approved").map(toInbox);
-  const widgets = widgetsFor(user.id).filter((w) => w.collectionId === col.id);
+  const widgets = (await widgetsFor(user.id)).filter((w) => w.collectionId === col.id);
   const origin = await getOrigin();
 
   return (

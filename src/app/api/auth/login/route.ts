@@ -16,12 +16,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "That email doesn't look right." }, { status: 400 });
   }
 
-  const user = findUserByEmail(email) ?? createUser(email);
+  const user = (await findUserByEmail(email)) ?? (await createUser(email));
 
   // returning users who removed everything still get a working start point
-  if (collectionsFor(user.id).length === 0) {
+  if ((await collectionsFor(user.id)).length === 0) {
     try {
-      createCollection(user.id, "Customer love");
+      await createCollection(user.id, "Customer love");
     } catch {
       /* read-only FS: the workspace still opens */
     }

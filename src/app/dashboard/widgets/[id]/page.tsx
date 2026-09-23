@@ -14,11 +14,11 @@ export default async function WidgetEditorPage({
 }) {
   const { id } = await params;
   const user = await requireUser();
-  const rec = getWidgetRecord(id);
+  const rec = await getWidgetRecord(id);
   if (!rec || rec.userId !== user.id) notFound();
   if (!getWidget(rec.type)) notFound();
 
-  const cols = collectionsFor(user.id);
+  const cols = await collectionsFor(user.id);
   const origin = await getOrigin();
 
   return (

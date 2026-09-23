@@ -5,8 +5,12 @@ import { DEMO_TESTIMONIALS } from "./widgets/demo-data";
 import { defaultsFor, getWidget } from "./widgets/registry";
 import type { WidgetConfig } from "./widgets/types";
 
-/* v0 data layer: a typed JSON file store with an interface shaped exactly like
-   the future Prisma/Postgres repositories, so the swap is mechanical. */
+/* Data layer: durable across serverless instances. The store lives in a
+   private GitHub repo (Contents API) when GITHUB_DATA_REPO/GITHUB_DATA_TOKEN
+   are set — /tmp dies on every cold start and deploy — and falls back to a
+   local JSON file for development. All functions are async; mutations are
+   serialized per instance and written through with last-write-wins on
+   concurrent instances. */
 
 export interface User {
   id: string;
@@ -50,34 +54,140 @@ interface DBShape {
   widgets: WidgetRecord[];
 }
 
+const EMPTY: DBShape = { users: [], collections: [], testimonials: [], widgets: [] };
+
 const DATA_DIR = process.env.PLANCKUI_DATA_DIR
   || (process.env.VERCEL === "1" ? "/tmp/planckui-data" : path.join(process.cwd(), ".data"));
 const DB_PATH = path.join(DATA_DIR, "db.json");
 
-/* Serverless instances don't share /tmp, and a read-only FS must never 500 an
-   auth route — so writes always land in memory first and touch disk only when
-   it works. Each instance stays self-consistent for its lifetime; the real
-   fix is the Postgres swap this interface is shaped for. */
-let mem: DBShape | null = null;
+const GH_REPO = process.env.GITHUB_DATA_REPO || "";
+const GH_TOKEN = process.env.GITHUB_DATA_TOKEN || "";
+const GH_API = GH_REPO ? `https://api.github.com/repos/${GH_REPO}/contents/data/db.json` : "";
 
-function read(): DBShape {
+interface Memo { sha: string | null; data: DBShape | null; at: number }
+const g = globalThis as unknown as { __plkDb?: Memo; __plkLock?: Promise<unknown> };
+const memo: Memo = g.__plkDb ?? (g.__plkDb = { sha: null, data: null, at: 0 });
+
+function localRead(): DBShape | null {
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, "utf8")) as DBShape;
+    const parsed = JSON.parse(fs.readFileSync(DB_PATH, "utf8")) as DBShape;
+    if (!parsed || !Array.isArray(parsed.users)) return null;
+    return parsed;
   } catch {
-    return mem ?? { users: [], collections: [], testimonials: [], widgets: [] };
+    return null;
   }
 }
-
-function write(db: DBShape): void {
-  mem = db;
+function localWrite(db: DBShape): void {
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     const tmp = DB_PATH + ".tmp";
     fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
     fs.renameSync(tmp, DB_PATH);
   } catch {
-    /* disk unavailable — the in-memory copy above keeps this instance working */
+    /* read-only fs — memory copy keeps this instance serving */
   }
+}
+
+const ghHeaders = () => ({
+  authorization: `Bearer ${GH_TOKEN}`,
+  accept: "application/vnd.github+json",
+  "user-agent": "planckui",
+  "content-type": "application/json",
+});
+
+async function ghFetch(): Promise<DBShape> {
+  const res = await fetch(GH_API, { headers: ghHeaders(), cache: "no-store" });
+  if (res.status === 404) {
+    memo.sha = null;
+    return EMPTY;
+  }
+  if (!res.ok) throw new Error(`db read failed: ${res.status}`);
+  const j = (await res.json()) as { sha: string; content: string };
+  memo.sha = j.sha;
+  const parsed = JSON.parse(Buffer.from(j.content, "base64").toString("utf8")) as DBShape;
+  if (!parsed || !Array.isArray(parsed.users)) return EMPTY;
+  return parsed;
+}
+
+async function ghPush(db: DBShape): Promise<void> {
+  const body: Record<string, unknown> = {
+    message: "planckui data sync",
+    content: Buffer.from(JSON.stringify(db, null, 2), "utf8").toString("base64"),
+  };
+  if (memo.sha) body.sha = memo.sha;
+  const res = await fetch(GH_API, {
+    method: "PUT",
+    headers: ghHeaders(),
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  if (res.status === 409 || res.status === 422) {
+    // someone else wrote between our read and write — overwrite with fresh sha
+    await ghFetch();
+    const retry: Record<string, unknown> = {
+      message: "planckui data sync (retry)",
+      content: Buffer.from(JSON.stringify(db, null, 2), "utf8").toString("base64"),
+    };
+    if (memo.sha) retry.sha = memo.sha;
+    const res2 = await fetch(GH_API, {
+      method: "PUT",
+      headers: ghHeaders(),
+      body: JSON.stringify(retry),
+      cache: "no-store",
+    });
+    if (!res2.ok) throw new Error(`db write failed: ${res2.status}`);
+    const j2 = (await res2.json()) as { content: { sha: string } };
+    memo.sha = j2.content.sha;
+    return;
+  }
+  if (!res.ok) throw new Error(`db write failed: ${res.status}`);
+  const j = (await res.json()) as { content: { sha: string } };
+  memo.sha = j.content.sha;
+}
+
+async function readDb(): Promise<DBShape> {
+  // short-lived memo keeps a burst of requests on one instance to one API call
+  if (memo.data && Date.now() - memo.at < 3000) return memo.data;
+  if (GH_API) {
+    try {
+      const db = await ghFetch();
+      memo.data = db;
+      memo.at = Date.now();
+      localWrite(db); // warm-instance mirror
+      return db;
+    } catch {
+      // GitHub unreachable: serve the freshest thing we have rather than 500
+      return memo.data ?? localRead() ?? EMPTY;
+    }
+  }
+  return localRead() ?? memo.data ?? EMPTY;
+}
+
+async function writeDb(db: DBShape): Promise<void> {
+  memo.data = db;
+  memo.at = Date.now();
+  localWrite(db);
+  if (GH_API) {
+    try {
+      await ghPush(db);
+    } catch {
+      /* stay available on the in-memory + local copy; next write retries */
+    }
+  }
+}
+
+/* serialize read-modify-write within this instance */
+function mutate<T>(fn: (db: DBShape) => T): Promise<T> {
+  const prev = g.__plkLock ?? Promise.resolve();
+  const next = prev.then(async () => {
+    const db = await readDb();
+    const fresh = JSON.parse(JSON.stringify(db)) as DBShape; // mutate a copy
+    const result = fn(fresh);
+    await writeDb(fresh);
+    return result;
+  });
+  g.__plkLock = next.catch(() => undefined);
+  return next;
 }
 
 export function uid(): string {
@@ -94,43 +204,42 @@ export function slugify(s: string): string {
 
 /* ---------------------------------------------------------------- users */
 
-export function findUserByEmail(email: string): User | undefined {
-  return read().users.find((u) => u.email === email.toLowerCase().trim());
+export async function findUserByEmail(email: string): Promise<User | undefined> {
+  return (await readDb()).users.find((u) => u.email === email.toLowerCase().trim());
 }
 
-export function getUser(id: string): User | undefined {
-  return read().users.find((u) => u.id === id);
+export async function getUser(id: string): Promise<User | undefined> {
+  return (await readDb()).users.find((u) => u.id === id);
 }
 
-export function createUser(email: string | null): User {
-  const db = read();
-  const user: User = {
-    id: uid(),
-    email: email ? email.toLowerCase().trim() : null,
-    createdAt: new Date().toISOString(),
-  };
-  db.users.push(user);
-  write(db);
-  seedForUser(user.id);
-  return user;
+export async function createUser(email: string | null): Promise<User> {
+  return mutate((db) => {
+    const user: User = {
+      id: uid(),
+      email: email ? email.toLowerCase().trim() : null,
+      createdAt: new Date().toISOString(),
+    };
+    db.users.push(user);
+    seedForUser(db, user.id);
+    return user;
+  });
 }
 
 /* Claim a guest workspace: attach an email after the fact, turning it into a
    regular account without touching its widgets or collections. */
-export function setUserEmail(id: string, email: string): User | undefined {
-  const db = read();
-  const user = db.users.find((u) => u.id === id);
-  if (!user) return undefined;
-  user.email = email.toLowerCase().trim();
-  write(db);
-  return user;
+export async function setUserEmail(id: string, email: string): Promise<User | undefined> {
+  return mutate((db) => {
+    const user = db.users.find((u) => u.id === id);
+    if (!user) return undefined;
+    user.email = email.toLowerCase().trim();
+    return user;
+  });
 }
 
 /* First-run seed: one collection with realistic testimonials (a mix of
    approved and pending) plus a Wall of Love, so the whole loop is
    explorable immediately. Realistic data, never lorem ipsum. */
-export function seedForUser(userId: string): void {
-  const db = read();
+function seedForUser(db: DBShape, userId: string): void {
   const col: Collection = {
     id: uid(),
     userId,
@@ -163,143 +272,142 @@ export function seedForUser(userId: string): void {
     config: { ...(def ? defaultsFor(def) : ({} as WidgetConfig)), maxWidth: 880 },
     createdAt: new Date().toISOString(),
   });
-  write(db);
 }
 
 /* ---------------------------------------------------------------- collections */
 
-export function collectionsFor(userId: string): Collection[] {
-  return read().collections.filter((c) => c.userId === userId);
+export async function collectionsFor(userId: string): Promise<Collection[]> {
+  return (await readDb()).collections.filter((c) => c.userId === userId);
 }
 
-export function getCollection(id: string): Collection | undefined {
-  return read().collections.find((c) => c.id === id);
+export async function getCollection(id: string): Promise<Collection | undefined> {
+  return (await readDb()).collections.find((c) => c.id === id);
 }
 
-export function getCollectionBySlug(slug: string): Collection | undefined {
-  return read().collections.find((c) => c.slug === slug);
+export async function getCollectionBySlug(slug: string): Promise<Collection | undefined> {
+  return (await readDb()).collections.find((c) => c.slug === slug);
 }
 
-export function createCollection(userId: string, name: string): Collection {
-  const db = read();
-  const col: Collection = {
-    id: uid(),
-    userId,
-    name,
-    slug: slugify(name + "-" + uid().slice(0, 4)),
-    createdAt: new Date().toISOString(),
-  };
-  db.collections.push(col);
-  write(db);
-  return col;
+export async function createCollection(userId: string, name: string): Promise<Collection> {
+  return mutate((db) => {
+    const col: Collection = {
+      id: uid(),
+      userId,
+      name,
+      slug: slugify(name + "-" + uid().slice(0, 4)),
+      createdAt: new Date().toISOString(),
+    };
+    db.collections.push(col);
+    return col;
+  });
 }
 
-export function updateCollection(id: string, patch: Partial<Pick<Collection, "name">>): void {
-  const db = read();
-  const col = db.collections.find((c) => c.id === id);
-  if (!col) return;
-  if (patch.name) col.name = patch.name;
-  write(db);
+export async function updateCollection(id: string, patch: Partial<Pick<Collection, "name">>): Promise<void> {
+  await mutate((db) => {
+    const col = db.collections.find((c) => c.id === id);
+    if (col && patch.name) col.name = patch.name;
+  });
 }
 
-export function deleteCollection(id: string): void {
-  const db = read();
-  db.collections = db.collections.filter((c) => c.id !== id);
-  db.testimonials = db.testimonials.filter((t) => t.collectionId !== id);
-  db.widgets = db.widgets.filter((w) => w.collectionId !== id);
-  write(db);
+export async function deleteCollection(id: string): Promise<void> {
+  await mutate((db) => {
+    db.collections = db.collections.filter((c) => c.id !== id);
+    db.testimonials = db.testimonials.filter((t) => t.collectionId !== id);
+    db.widgets = db.widgets.filter((w) => w.collectionId !== id);
+  });
 }
 
 /* ---------------------------------------------------------------- testimonials */
 
-export function testimonialsFor(collectionId: string): Testimonial[] {
-  return read().testimonials
+export async function testimonialsFor(collectionId: string): Promise<Testimonial[]> {
+  return (await readDb())
+    .testimonials
     .filter((t) => t.collectionId === collectionId)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-export function getTestimonial(id: string): Testimonial | undefined {
-  return read().testimonials.find((t) => t.id === id);
+export async function getTestimonial(id: string): Promise<Testimonial | undefined> {
+  return (await readDb()).testimonials.find((t) => t.id === id);
 }
 
-export function addTestimonial(
+export async function addTestimonial(
   t: Omit<Testimonial, "id" | "createdAt" | "tags"> & { tags?: string[] }
-): Testimonial {
-  const db = read();
-  const full: Testimonial = {
-    ...t,
-    id: uid(),
-    tags: t.tags ?? [],
-    createdAt: new Date().toISOString(),
-  };
-  db.testimonials.push(full);
-  write(db);
-  return full;
+): Promise<Testimonial> {
+  return mutate((db) => {
+    const full: Testimonial = {
+      ...t,
+      id: uid(),
+      tags: t.tags ?? [],
+      createdAt: new Date().toISOString(),
+    };
+    db.testimonials.push(full);
+    return full;
+  });
 }
 
-export function updateTestimonial(
+export async function updateTestimonial(
   id: string,
   patch: Partial<Pick<Testimonial, "status" | "tags">>
-): void {
-  const db = read();
-  const t = db.testimonials.find((x) => x.id === id);
-  if (!t) return;
-  if (patch.status) t.status = patch.status;
-  if (patch.tags) t.tags = patch.tags;
-  write(db);
+): Promise<void> {
+  await mutate((db) => {
+    const t = db.testimonials.find((x) => x.id === id);
+    if (!t) return;
+    if (patch.status) t.status = patch.status;
+    if (patch.tags) t.tags = patch.tags;
+  });
 }
 
-export function deleteTestimonial(id: string): void {
-  const db = read();
-  db.testimonials = db.testimonials.filter((t) => t.id !== id);
-  write(db);
+export async function deleteTestimonial(id: string): Promise<void> {
+  await mutate((db) => {
+    db.testimonials = db.testimonials.filter((t) => t.id !== id);
+  });
 }
 
 /* ---------------------------------------------------------------- widgets */
 
-export function widgetsFor(userId: string): WidgetRecord[] {
-  return read().widgets.filter((w) => w.userId === userId);
+export async function widgetsFor(userId: string): Promise<WidgetRecord[]> {
+  return (await readDb()).widgets.filter((w) => w.userId === userId);
 }
 
-export function getWidgetRecord(id: string): WidgetRecord | undefined {
-  return read().widgets.find((w) => w.id === id);
+export async function getWidgetRecord(id: string): Promise<WidgetRecord | undefined> {
+  return (await readDb()).widgets.find((w) => w.id === id);
 }
 
-export function createWidgetRecord(
+export async function createWidgetRecord(
   userId: string,
   data: Pick<WidgetRecord, "type" | "name" | "collectionId"> & { config?: Partial<WidgetConfig> }
-): WidgetRecord {
-  const db = read();
-  const def = getWidget(data.type);
-  const rec: WidgetRecord = {
-    id: uid(),
-    userId,
-    type: data.type,
-    name: data.name || (def ? def.name : data.type),
-    collectionId: data.collectionId,
-    config: { ...defaultsFor(def!), ...data.config },
-    createdAt: new Date().toISOString(),
-  };
-  db.widgets.push(rec);
-  write(db);
-  return rec;
+): Promise<WidgetRecord> {
+  return mutate((db) => {
+    const def = getWidget(data.type);
+    const rec: WidgetRecord = {
+      id: uid(),
+      userId,
+      type: data.type,
+      name: data.name || (def ? def.name : data.type),
+      collectionId: data.collectionId,
+      config: { ...defaultsFor(def!), ...data.config },
+      createdAt: new Date().toISOString(),
+    };
+    db.widgets.push(rec);
+    return rec;
+  });
 }
 
-export function updateWidgetRecord(
+export async function updateWidgetRecord(
   id: string,
   patch: Partial<Pick<WidgetRecord, "name" | "config" | "collectionId">>
-): void {
-  const db = read();
-  const w = db.widgets.find((x) => x.id === id);
-  if (!w) return;
-  if (patch.name !== undefined) w.name = patch.name;
-  if (patch.config !== undefined) w.config = patch.config;
-  if (patch.collectionId !== undefined) w.collectionId = patch.collectionId;
-  write(db);
+): Promise<void> {
+  await mutate((db) => {
+    const w = db.widgets.find((x) => x.id === id);
+    if (!w) return;
+    if (patch.name !== undefined) w.name = patch.name;
+    if (patch.config !== undefined) w.config = patch.config;
+    if (patch.collectionId !== undefined) w.collectionId = patch.collectionId;
+  });
 }
 
-export function deleteWidgetRecord(id: string): void {
-  const db = read();
-  db.widgets = db.widgets.filter((w) => w.id !== id);
-  write(db);
+export async function deleteWidgetRecord(id: string): Promise<void> {
+  await mutate((db) => {
+    db.widgets = db.widgets.filter((w) => w.id !== id);
+  });
 }

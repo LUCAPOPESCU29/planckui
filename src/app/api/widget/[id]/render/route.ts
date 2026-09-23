@@ -5,12 +5,12 @@ import { IFRAME_WIDGETS, renderWidget } from "@/lib/widgets/renderers";
    result into a Shadow DOM root on the host page. */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const w = getWidgetRecord(id);
+  const w = await getWidgetRecord(id);
   if (!w) return Response.json({ error: "Not found" }, { status: 404 });
 
   if (IFRAME_WIDGETS.has(w.type)) {
-    const col = w.collectionId ? getCollection(w.collectionId) : undefined;
-    const slug = col?.slug ?? getCollectionBySlug("demo")?.slug;
+    const col = w.collectionId ? await getCollection(w.collectionId) : undefined;
+    const slug = col?.slug ?? (await getCollectionBySlug("demo"))?.slug;
     if (!slug) return Response.json({ error: "No collection" }, { status: 400 });
     return Response.json(
       { iframeSrc: "/c/" + slug + "?embed=1&w=" + w.id },
@@ -22,11 +22,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const def = getWidget(w.type);
   const items: import("@/lib/widgets/types").TestimonialData[] = [];
   if (def?.needsCollection && w.collectionId) {
-    items.push(...testimonialsFor(w.collectionId).filter((t) => t.status === "approved"));
+    items.push(...(await testimonialsFor(w.collectionId)).filter((t) => t.status === "approved"));
   }
   // extra context renderers may need (e.g. the popup forms post back to the
   // collection; the render origin equals the host origin, so a relative slug)
-  const extra: Record<string, unknown> = { slug: w.collectionId ? (await import("@/lib/db")).getCollection(w.collectionId)?.slug : undefined };
+  const extra: Record<string, unknown> = { slug: w.collectionId ? (await (await import("@/lib/db")).getCollection(w.collectionId))?.slug : undefined };
   let out;
   try {
     out = renderWidget(w.type, w.config, items, extra);

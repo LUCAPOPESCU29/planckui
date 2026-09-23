@@ -8,12 +8,11 @@ export const metadata = { title: "Workspace" };
 
 export default async function DashboardPage() {
   const user = await requireUser();
-  const cols = collectionsFor(user.id);
-  const widgets = widgetsFor(user.id);
-  const pendingTotal = cols.reduce(
-    (n, c) => n + testimonialsFor(c.id).filter((t) => t.status === "pending").length,
-    0
-  );
+  const cols = await collectionsFor(user.id);
+  const widgets = await widgetsFor(user.id);
+  const pendingTotal = (
+    await Promise.all(cols.map((c) => testimonialsFor(c.id)))
+  ).reduce((n, ts) => n + ts.filter((t) => t.status === "pending").length, 0);
 
   return (
     <div className="flex flex-col gap-12">
@@ -55,8 +54,8 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <ul className="flex flex-col divide-y divide-line rounded-[var(--radius-lg)] border border-line bg-surface">
-            {cols.map((c) => {
-              const ts = testimonialsFor(c.id);
+            {cols.map(async (c) => {
+              const ts = await testimonialsFor(c.id);
               const pending = ts.filter((t) => t.status === "pending").length;
               const approved = ts.filter((t) => t.status === "approved").length;
               const usedBy = widgets.filter((w) => w.collectionId === c.id).length;

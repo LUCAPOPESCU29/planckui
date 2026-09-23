@@ -5,7 +5,7 @@ import type { WidgetConfig } from "@/lib/widgets/types";
 
 async function owned(id: string) {
   const userId = await currentUserId();
-  const w = getWidgetRecord(id);
+  const w = await getWidgetRecord(id);
   if (!userId || !w || w.userId !== userId) return null;
   return w;
 }
@@ -15,7 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const w = await owned(id);
   if (!w) return NextResponse.json({ error: "Not found." }, { status: 404 });
   const body = await req.json().catch(() => ({}));
-  updateWidgetRecord(id, {
+  await updateWidgetRecord(id, {
     name: typeof body.name === "string" ? body.name.slice(0, 60) : undefined,
     config: body.config && typeof body.config === "object" ? (body.config as WidgetConfig) : undefined,
     collectionId: typeof body.collectionId === "string" ? body.collectionId : undefined,
@@ -26,6 +26,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!(await owned(id))) return NextResponse.json({ error: "Not found." }, { status: 404 });
-  deleteWidgetRecord(id);
+  await deleteWidgetRecord(id);
   return NextResponse.json({ ok: true });
 }

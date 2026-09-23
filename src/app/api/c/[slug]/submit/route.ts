@@ -15,13 +15,13 @@ export async function OPTIONS() {
    counted in all states so a live poll works without hand-approving each one. */
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const col = getCollectionBySlug(slug);
+  const col = await getCollectionBySlug(slug);
   if (!col) return NextResponse.json({ error: "Not found" }, { status: 404, headers: CORS });
   const options = (new URL(req.url).searchParams.get("options") || "")
     .split("|")
     .map((s) => s.trim())
     .filter(Boolean);
-  const all = testimonialsFor(col.id);
+  const all = await testimonialsFor(col.id);
   const counts = options.map((o) => {
     const tag = "poll:" + o.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 30);
     return all.filter((t) => t.tags.includes(tag)).length;
@@ -37,7 +37,7 @@ function cleanTag(t: string): string {
    arrives as pending; nothing is displayed until the owner approves it. */
 export async function POST(req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const col = getCollectionBySlug(slug);
+  const col = await getCollectionBySlug(slug);
   if (!col) return NextResponse.json({ error: "This link has expired." }, { status: 404, headers: CORS });
 
   const body = await req.json().catch(() => ({}));
@@ -70,7 +70,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     author = "Anonymous";
   }
 
-  addTestimonial({
+  await addTestimonial({
     collectionId: col.id,
     author,
     role,

@@ -7,11 +7,11 @@ import { getCollection, testimonialsFor } from "@/lib/db";
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const userId = await currentUserId();
-  const col = getCollection(id);
+  const col = await getCollection(id);
   if (!userId || !col || col.userId !== userId) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
-  const items = testimonialsFor(id)
+  const items = (await testimonialsFor(id))
     .filter((t) => t.status === "approved")
     .map((t) => ({
       id: t.id,
