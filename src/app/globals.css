@@ -529,3 +529,23 @@ code, pre {
   padding: 0.1875rem 0.625rem;
   background: var(--surface);
 }
+
+/* export menu — frosted panel, Mac-menu conventions */
+.export-menu {
+  min-width: 250px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in oklab, var(--line-2) 80%, transparent);
+  background: color-mix(in oklab, var(--surface) 62%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(1.7);
+  backdrop-filter: blur(18px) saturate(1.7);
+  box-shadow: var(--shadow-lg);
+  transform-origin: top right;
+  animation: menu-in 160ms var(--ease-out);
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
