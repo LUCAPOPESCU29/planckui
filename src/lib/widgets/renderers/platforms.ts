@@ -9,6 +9,15 @@ import type { RenderResult, WidgetConfig } from "../types";
 type PR = (c: WidgetConfig) => RenderResult;
 
 const PL_CSS = `
+.pf-auth, .pf-mini, .pfl-post {
+  --b-card: #ffffff; --b-ink: #17181c; --b-mut: #6b7280;
+  --b-line: #e5e7eb; --b-input: #f5f6f8;
+}
+:host(.dark) .pf-auth, :host(.dark) .pf-mini, :host(.dark) .pfl-post {
+  --b-card: #16181d; --b-ink: #f2f4f7; --b-mut: #8b929c;
+  --b-line: #2a2f38; --b-input: #101318;
+}
+:host(.dark) .pf-btn { box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.22); }
 .pf-auth, .pf-mini { max-width: 380px; margin-inline: auto; border-radius: var(--w-radius, 18px);
   padding: 28px; border: 1px solid var(--b-line); background: var(--b-card); color: var(--b-ink);
   box-shadow: 0 22px 50px oklch(0 0 0 / 0.28);
@@ -44,12 +53,6 @@ const PL_CSS = `
 .pf-acts { display: flex; gap: 18px; padding: 10px 14px; font-size: 13px; color: var(--b-mut); }
 `;
 
-function pal(tone: "light" | "dark", accent: string): string {
-  if (tone === "dark") {
-    return `--b-card:#16181d;--b-ink:#f2f4f7;--b-mut:#8b929c;--b-line:#2a2f38;--b-input:#101318;--b-accent:${accent};`;
-  }
-  return `--b-card:#ffffff;--b-ink:#17181c;--b-mut:#6b7280;--b-line:#e5e7eb;--b-input:#f5f6f8;--b-accent:${accent};`;
-}
 
 /* real brand marks (simple-icons geometry), letter chip as fallback */
 const MARKS: Record<string, string> = {
@@ -94,7 +97,7 @@ function markFor(brand: string): string {
 }
 
 const MARK_ALIAS: Record<string, string> = { ms: "microsoft", gdrive: "drive" };
-function chipMark(brand: string, size = 22): string {
+export function chipMark(brand: string, size = 22): string {
   const key = MARK_ALIAS[brand] || brand;
   return brandSvg(key, size) || MARKS[key] || markFor(key);
 }
@@ -106,16 +109,9 @@ interface AuthOpts {
   mark: string; chipBg?: string; title: string; sub: string; btn: string; btnBg: string;
   btnColor?: string; social?: string[]; pw?: boolean;
 }
-function palettes(tone: "light" | "dark", accent: string): string {
-  if (tone === "dark") {
-    return `--b-card:#16181d;--b-ink:#f2f4f7;--b-mut:#8b929c;--b-line:#2a2f38;--b-input:#101318;--b-accent:${accent};`;
-  }
-  return `--b-card:#ffffff;--b-ink:#17181c;--b-mut:#6b7280;--b-line:#e5e7eb;--b-input:#f5f6f8;--b-accent:${accent};`;
-}
-
 function authW(o: AuthOpts): PR {
   return (c) => {
-    const pal = palettes(o.tone || "dark", o.accent);
+    const accentVars = "--b-accent:" + o.accent + ";";
     const body =
       `<div class="pf-mark" style="background:${o.chipBg || "var(--b-input)"}">${o.mark}</div>` +
       `<h3>${esc(o.title)}</h3><p class="pf-sub">${esc(o.sub)}</p>` +
@@ -130,16 +126,13 @@ function authW(o: AuthOpts): PR {
           `</div>`
         : "") +
       `<p class="pf-foot">No credit card. No spam. Just paste it.</p>`;
-    const css =
-      ":host { display: block; }" +
-      (o.tone === "dark" ? ":host { --b-pagebg: #0b0d10; }" : ":host { --b-pagebg: #eef1f4; }");
     const js =
       "var f=shadow.getElementById('pf-f');" +
       "f.addEventListener('submit',function(e){e.preventDefault();" +
       "if(!f.checkValidity()){f.reportValidity();return}" +
       "var b=f.querySelector('.pf-btn');b.textContent='Signing in…';b.disabled=true;" +
       "setTimeout(function(){b.textContent='Welcome back ✓';b.disabled=false},900)});";
-    return { html: '<div class="pf-auth" style="' + pal + '">' + body + "</div>", css: PL_CSS + css, js: undefined };
+    return { html: '<div class="pf-auth" style="' + accentVars + '">' + body + "</div>", css: PL_CSS, js: undefined };
   };
 }
 
@@ -150,15 +143,15 @@ interface MiniOpts {
 }
 function miniW(o: MiniOpts): PR {
   return (c) => {
-    const pal = palettes(o.tone || "light", o.accent);
+    const accentVars = "--b-accent:" + o.accent + ";";
     const body =
       `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">` +
-      `<span class="pf-mark" style="margin:0;background:${o.chipBg || "var(--b-accent)"}">${o.mark}</span>` +
+      `<span class="pf-mark" style="margin:0;background:${o.chipBg || "var(--b-accent)"}${o.chipBg ? "" : ";color:#fff"}">${o.mark}</span>` +
       `<div><b style="font-size:14.5px">${esc(o.title)}</b><div style="font-size:12px;color:var(--b-mut)">${esc(o.sub)}</div></div></div>` +
       (o.bar !== undefined ? `<div style="height:6px;border-radius:999px;background:var(--b-line);overflow:hidden"><div style="height:100%;width:${o.bar}%;background:var(--b-accent);border-radius:999px"></div></div>` : "") +
       `<div style="margin-top:12px;font-size:12px;color:var(--b-mut)">${esc(o.meta)}</div>` +
       (o.btn ? `<button class="pf-btn" type="button" style="margin-top:12px;background:${o.btnBg || "var(--b-accent)"}">${esc(o.btn)}</button>` : "");
-    return { html: '<div class="pf-mini" style="' + pal + '">' + body + "</div>", css: PL_CSS };
+    return { html: '<div class="pf-mini" style="' + accentVars + '">' + body + "</div>", css: PL_CSS };
   };
 }
 
@@ -191,7 +184,7 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
   "auth-slack": au({ accent: "#611f69", tone: "light", card: "#ffffff", line: "#e5e7eb", mark: chipMark("slack", 24), title: "Sign in to Slack", sub: "Your workspace, one click away.", btn: "Continue with Slack", btnBg: "#611f69", social: ["google", "apple"] }),
   "auth-discord": au({ accent: "#5865f2", tone: "dark", card: "#23272a", line: "#3a3f47", mark: chipMark("discord", 24), title: "Welcome back", sub: "You are missed around here.", btn: "Login", btnBg: "#5865f2", social: [] }),
   "auth-spotify": au({ accent: "#1db954", tone: "dark", card: "#121212", line: "#2a2a2a", mark: chipMark("spotify", 26), title: "Login to Spotify", sub: "Millions of songs. Free on PlanckUi.", btn: "Continue with Spotify", btnBg: "#1db954", social: ["google", "apple"] }),
-  "auth-notion": au({ accent: "#111827", tone: "light", card: "#ffffff", line: "#e5e7eb", mark: chipMark("notion", 24), title: "Notion — sign in", sub: "Your second brain, synced.", btn: "Continue with email", btnBg: "#111827", social: ["google", "apple"] }),
+  "auth-notion": au({ chipBg: "#ffffff", accent: "#111827", tone: "light", card: "#ffffff", line: "#e5e7eb", mark: chipMark("notion", 24), title: "Notion — sign in", sub: "Your second brain, synced.", btn: "Continue with email", btnBg: "#111827", social: ["google", "apple"] }),
   "auth-linear": au({ accent: "#8b8cf8", tone: "dark", card: "#191919", line: "#2c2c2c", mark: chipMark("linear", 24), title: "Login to Linear", sub: "A better way to build products", btn: "Continue", btnBg: "#5e6ad2", social: ["google", "github"] }),
   "auth-stripe": au({ accent: "#635bff", tone: "light", card: "#ffffff", line: "#e5e7eb", mark: chipMark("stripe", 24), title: "Stripe Dashboard", sub: "Sign in to your account", btn: "Continue", btnBg: "#635bff", social: ["google", "github"] }),
   "auth-twitch": au({ accent: "#9146ff", tone: "dark", card: "#18181b", line: "#2f2f35", mark: chipMark("twitch", 24), title: "Login with Twitch", sub: "Be the first to watch live.", btn: "Continue with Twitch", btnBg: "#9146ff", social: [] }),
@@ -209,10 +202,10 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
   // -- chat & comms (6)
   "whatsapp-chat": mi({ accent: "#25d366", tone: "light", mark: chipMark("whatsapp", 22), title: "Fern & Co.", sub: "typing…", meta: "online", btn: "Open chat", btnBg: "#25d366" }),
   "telegram-channel": mi({ accent: "#229ed9", tone: "light", mark: chipMark("telegram", 22), title: "PlanckUi News", sub: "12.4K subscribers", meta: "@planckui", btn: "Join channel", btnBg: "#229ed9" }),
-  "messenger-card": mi({ accent: "#0084ff", tone: "light", mark: chipMark("messenger", 22), title: "Maya Okafor", sub: "Sent you a widget", meta: "Messenger · now", btn: "Open chat", btnBg: "#0084ff" }),
-  "slack-message": mi({ accent: "#611f69", tone: "light", mark: chipMark("slack", 20), title: "Maya Okafor", sub: "Shipped the new catalog 🚀", meta: "#general · just now", btn: "Open Slack", btnBg: "#611f69" }),
+  "messenger-card": mi({ chipBg: "#ffffff", accent: "#0084ff", tone: "light", mark: chipMark("messenger", 22), title: "Maya Okafor", sub: "Sent you a widget", meta: "Messenger · now", btn: "Open chat", btnBg: "#0084ff" }),
+  "slack-message": mi({ chipBg: "#ffffff", accent: "#611f69", tone: "light", mark: chipMark("slack", 20), title: "Maya Okafor", sub: "Shipped the new catalog 🚀", meta: "#general · just now", btn: "Open Slack", btnBg: "#611f69" }),
   "discord-embed": mi({ accent: "#5865f2", tone: "dark", mark: chipMark("discord", 22), title: "#announcements", sub: "v2.6 — 35 new widgets just landed", meta: "Today at 4:12 PM", btn: "Open Discord", btnBg: "#5865f2" }),
-  "zoom-meeting": mi({ accent: "#2d8cff", tone: "light", mark: chipMark("zoom", 22), title: "Weekly sync", sub: "Starts in 12 minutes", meta: "9 participants", btn: "Join meeting", btnBg: "#2d8cff" }),
+  "zoom-meeting": mi({ chipBg: "#ffffff", accent: "#2d8cff", tone: "light", mark: chipMark("zoom", 22), title: "Weekly sync", sub: "Starts in 12 minutes", meta: "9 participants", btn: "Join meeting", btnBg: "#2d8cff" }),
 
   // -- players (5)
   "spotify-player": mi({ accent: "#1db954", tone: "dark", mark: chipMark("spotify", 22), title: "Blinding Lights — The Weeknd", sub: "After Hours", meta: "1:42 / 3:20 · Pause", btnBg: "#1db954", bar: 52 }),
@@ -222,33 +215,33 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
   "twitch-live": mi({ accent: "#9146ff", tone: "dark", mark: chipMark("twitch", 22), title: "PlanckUiDev is live", sub: "1,204 watching", meta: "Category: Software", btn: "Watch", btnBg: "#9146ff" }),
 
   // -- work tools (8)
-  "notion-page": mi({ accent: "#111827", tone: "light", mark: chipMark("notion", 22), title: "Product roadmap", sub: "Last edited 2h ago", meta: "Shared with 4 people", btn: "Open page", btnBg: "#111827" }),
-  "figma-file": mi({ accent: "#a259ff", tone: "light", mark: chipMark("figma", 22), title: "Widget system — v3", sub: "3 collaborators online", meta: "Auto-saved", btn: "Open file", btnBg: "#a259ff" }),
-  "gmail-email": mi({ accent: "#ea4335", tone: "light", mark: chipMark("gmail", 22), title: "Maya from Fern & Co.", sub: "That widget idea you had — do it", meta: "10:42 AM", btn: "Open Gmail", btnBg: "#ea4335" }),
-  "google-docs": mi({ accent: "#4285f4", tone: "light", mark: chipMark("gdocs", 22), title: "Launch checklist", sub: "Edited by 3 people", meta: "Docs", btn: "Open doc", btnBg: "#4285f4" }),
-  "drive-meter": mi({ accent: "#4285f4", tone: "light", mark: chipMark("gdrive", 22), title: "Google Drive", sub: "9.2 GB of 15 GB used", meta: "62% full", bar: 62, btn: "Manage storage", btnBg: "#4285f4" }),
-  "dropbox-file": mi({ accent: "#0061ff", tone: "light", mark: chipMark("dropbox", 22), title: "brand-assets.zip", sub: "Shared with 3 people", meta: "Synced just now", btn: "Open Dropbox", btnBg: "#0061ff" }),
-  "trello-board": mi({ accent: "#0079bf", tone: "light", mark: chipMark("trello", 22), title: "Launch board", sub: "4 lists · 18 cards", meta: "Updated 5m ago", btn: "Open board", btnBg: "#0079bf" }),
+  "notion-page": mi({ chipBg: "#ffffff", accent: "#111827", tone: "light", mark: chipMark("notion", 22), title: "Product roadmap", sub: "Last edited 2h ago", meta: "Shared with 4 people", btn: "Open page", btnBg: "#111827" }),
+  "figma-file": mi({ chipBg: "#ffffff", accent: "#a259ff", tone: "light", mark: chipMark("figma", 22), title: "Widget system — v3", sub: "3 collaborators online", meta: "Auto-saved", btn: "Open file", btnBg: "#a259ff" }),
+  "gmail-email": mi({ chipBg: "#ffffff", accent: "#ea4335", tone: "light", mark: chipMark("gmail", 22), title: "Maya from Fern & Co.", sub: "That widget idea you had — do it", meta: "10:42 AM", btn: "Open Gmail", btnBg: "#ea4335" }),
+  "google-docs": mi({ chipBg: "#ffffff", accent: "#4285f4", tone: "light", mark: chipMark("gdocs", 22), title: "Launch checklist", sub: "Edited by 3 people", meta: "Docs", btn: "Open doc", btnBg: "#4285f4" }),
+  "drive-meter": mi({ chipBg: "#ffffff", accent: "#4285f4", tone: "light", mark: chipMark("gdrive", 22), title: "Google Drive", sub: "9.2 GB of 15 GB used", meta: "62% full", bar: 62, btn: "Manage storage", btnBg: "#4285f4" }),
+  "dropbox-file": mi({ chipBg: "#ffffff", accent: "#0061ff", tone: "light", mark: chipMark("dropbox", 22), title: "brand-assets.zip", sub: "Shared with 3 people", meta: "Synced just now", btn: "Open Dropbox", btnBg: "#0061ff" }),
+  "trello-board": mi({ chipBg: "#ffffff", accent: "#0079bf", tone: "light", mark: chipMark("trello", 22), title: "Launch board", sub: "4 lists · 18 cards", meta: "Updated 5m ago", btn: "Open board", btnBg: "#0079bf" }),
   "github-pr": mi({ accent: "#238636", tone: "dark", mark: chipMark("github", 22), title: "Add 35 platform widgets", sub: "#482 · opened by you", meta: "✓ All checks passed", btn: "Open pull request", btnBg: "#238636" }),
 
   // -- commerce & finance (8)
-  "stripe-payment": mi({ accent: "#635bff", tone: "light", mark: chipMark("stripe", 22), title: "Pay $49.00", sub: "PlanckUi Pro — monthly", meta: "Powered by Stripe", btn: "Pay now", btnBg: "#635bff" }),
-  "paypal-checkout": mi({ accent: "#0070ba", tone: "light", mark: chipMark("paypal", 22), title: "PayPal Checkout", sub: "$49.00 to PlanckUi", meta: "Buyer protection included", btn: "Pay with PayPal", btnBg: "#0070ba" }),
-  "venmo-send": mi({ accent: "#3d95ce", tone: "light", mark: chipMark("venmo", 22), title: "Send $25", sub: "To: Maya Okafor", meta: "Instant transfer", btn: "Send", btnBg: "#3d95ce" }),
-  "metamask-connect": mi({ accent: "#f6851b", tone: "dark", mark: chipMark("metamask", 22), title: "MetaMask", sub: "Connect your wallet to continue", meta: "Ethereum Mainnet", btn: "Connect wallet", btnBg: "#f6851b" }),
-  "shopify-order": mi({ accent: "#5e8e3e", tone: "light", mark: chipMark("shopify", 22), title: "Order #1042", sub: "Paid · 2 items · $86.00", meta: "Shipped yesterday", btn: "Track order", btnBg: "#5e8e3e" }),
-  "airbnb-listing": mi({ accent: "#ff385c", tone: "light", mark: chipMark("airbnb", 22), title: "Cabin near the lake", sub: "4.97 ★ · 212 reviews", meta: "$142 / night", btn: "Check availability", btnBg: "#ff385c" }),
+  "stripe-payment": mi({ chipBg: "#ffffff", accent: "#635bff", tone: "light", mark: chipMark("stripe", 22), title: "Pay $49.00", sub: "PlanckUi Pro — monthly", meta: "Powered by Stripe", btn: "Pay now", btnBg: "#635bff" }),
+  "paypal-checkout": mi({ chipBg: "#ffffff", accent: "#0070ba", tone: "light", mark: chipMark("paypal", 22), title: "PayPal Checkout", sub: "$49.00 to PlanckUi", meta: "Buyer protection included", btn: "Pay with PayPal", btnBg: "#0070ba" }),
+  "venmo-send": mi({ chipBg: "#ffffff", accent: "#3d95ce", tone: "light", mark: chipMark("venmo", 22), title: "Send $25", sub: "To: Maya Okafor", meta: "Instant transfer", btn: "Send", btnBg: "#3d95ce" }),
+  "metamask-connect": mi({ chipBg: "#ffffff", accent: "#f6851b", tone: "dark", mark: chipMark("metamask", 22), title: "MetaMask", sub: "Connect your wallet to continue", meta: "Ethereum Mainnet", btn: "Connect wallet", btnBg: "#f6851b" }),
+  "shopify-order": mi({ chipBg: "#ffffff", accent: "#5e8e3e", tone: "light", mark: chipMark("shopify", 22), title: "Order #1042", sub: "Paid · 2 items · $86.00", meta: "Shipped yesterday", btn: "Track order", btnBg: "#5e8e3e" }),
+  "airbnb-listing": mi({ chipBg: "#ffffff", accent: "#ff385c", tone: "light", mark: chipMark("airbnb", 22), title: "Cabin near the lake", sub: "4.97 ★ · 212 reviews", meta: "$142 / night", btn: "Check availability", btnBg: "#ff385c" }),
   "uber-ride": mi({ accent: "#0e0e0e", tone: "dark", mark: chipMark("uber", 22), title: "Driver arriving", sub: "3 min · Toyota Prius · 7XKJ", meta: "Trip to Hauptplatz 8", btn: "Contact driver", btnBg: "#0e0e0e" }),
   "order-tracker": mi({ accent: "#0e0e0e", tone: "dark", mark: chipMark("order", 22), title: "Order #1042", sub: "Shipped · arrives Tuesday", meta: "Out for delivery", btn: "View details", btnBg: "#0e0e0e" }),
 
   // -- misc (3)
   "steam-game": mi({ accent: "#1b2838", tone: "dark", mark: chipMark("steam", 22), title: "Factorio", sub: "Overwhelmingly positive · 38€", meta: "Now playing", btn: "View store page", btnBg: "#1b2838" }),
-  "play-store-app": mi({ accent: "#34a853", tone: "light", mark: chipMark("gplay", 22), title: "PlanckUi Widgets", sub: "4.8 ★ · 12K reviews", meta: "Install — 8 MB", btn: "Install", btnBg: "#34a853" }),
-  "ph-launch": mi({ accent: "#da552f", tone: "light", mark: chipMark("ph", 22), title: "PlanckUi 2.0 launch", sub: "▲ 482 upvotes · #3 today", meta: "Product Hunt", btn: "View launch", btnBg: "#da552f" }),
+  "play-store-app": mi({ chipBg: "#ffffff", accent: "#34a853", tone: "light", mark: chipMark("gplay", 22), title: "PlanckUi Widgets", sub: "4.8 ★ · 12K reviews", meta: "Install — 8 MB", btn: "Install", btnBg: "#34a853" }),
+  "ph-launch": mi({ chipBg: "#ffffff", accent: "#da552f", tone: "light", mark: chipMark("ph", 22), title: "PlanckUi 2.0 launch", sub: "▲ 482 upvotes · #3 today", meta: "Product Hunt", btn: "View launch", btnBg: "#da552f" }),
 
   // -- extras (5)
   "wa-cta": (c) => {
-    const palette = pal("light", "#25d366");
+    
     const body =
       `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">` +
       `<span class="pf-mark" style="margin:0;background:#25d366;color:#fff">${chipMark("whatsapp", 22)}</span>` +
@@ -257,7 +250,7 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
       `<p style="margin:0 0 14px;font-size:13.5px;color:var(--b-mut)">Questions about sizes, shipping or returns? Message us on WhatsApp — a human answers, not a bot.</p>` +
       `<button class="pf-btn" type="button" style="background:#25d366">Chat on WhatsApp</button>`;
     const css = PL_CSS + "@keyframes pf-pulse{0%{box-shadow:0 0 0 0 oklch(0.75 0.18 150 / 0.55)}70%{box-shadow:0 0 0 12px oklch(0.75 0.18 150 / 0)}100%{box-shadow:0 0 0 0 oklch(0.75 0.18 150 / 0)}}";
-    return { html: '<div class="pf-mini" style="' + pal + '">' + body + "</div>", css };
+    return { html: '<div class="pf-mini" style="--b-accent:#25d366">' + body + "</div>", css };
   },
   "ig-grid": () => {
     const tiles = ["#f9ce34,#ee2a7b,#6228d7", "#0f2027,#2c5364", "#f64f59,#c471ed,#12c2e9", "#ff9966,#ff5e62", "#16a085,#f4d03f", "#8e2de2,#4a00e0", "#e96443,#904e95", "#373b44,#4286f4", "#f7797d,#c471ed"]
@@ -267,7 +260,7 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
       `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><span class="pf-ava" style="border-radius:12px;background:linear-gradient(135deg,#f9ce34,#ee2a7b,#6228d7)">P</span><div><b style="font-size:14px;display:block">planckui</b><span style="font-size:12px;color:var(--b-mut)">@planckui · Instagram</span></div></div>` +
       `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">${tiles}</div>` +
       `<div style="margin-top:10px;font-size:12px;color:var(--b-mut)">Latest 9 posts · updated live</div>`;
-    return { html: '<div class="pf-mini" style="' + pal("light", "#e1306c") + ';max-width:340px">' + body + "</div>", css: PL_CSS };
+    return { html: '<div class="pf-mini" style="--b-accent:#e1306c;max-width:340px">' + body + "</div>", css: PL_CSS };
   },
   "yt-card": () => {
     const body =
@@ -278,7 +271,7 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
       `<div style="display:flex;gap:10px"><span class="pf-ava" style="background:#ff0000">${chipMark("youtube", 18)}</span>` +
       `<div><b style="font-size:14px;display:block;line-height:1.35">Build a widget in 10 minutes</b>` +
       `<span style="font-size:12px;color:var(--b-mut)">PlanckUi · 124K views · 2 days ago</span></div></div>`;
-    return { html: '<div class="pf-mini" style="' + pal("light", "#ff0000") + ';max-width:360px">' + body + "</div>", css: PL_CSS };
+    return { html: '<div class="pf-mini" style="--b-accent:#ff0000;max-width:360px">' + body + "</div>", css: PL_CSS };
   },
   "tg-chat": () => {
     const bubble = (me: boolean, txt: string, time: string) =>
@@ -291,7 +284,7 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
       bubble(false, "Just shipped the new widget catalog 🚀", "10:41") +
       bubble(true, "the pricing cards are unreal", "10:42") +
       bubble(false, "wait till you see the aurora ones ✨", "10:43");
-    return { html: '<div class="pf-mini" style="' + pal("light", "#229ed9") + ';max-width:360px">' + body + "</div>", css: PL_CSS };
+    return { html: '<div class="pf-mini" style="--b-accent:#229ed9;max-width:360px">' + body + "</div>", css: PL_CSS };
   },
   "li-banner": () => {
     const body =
@@ -302,6 +295,6 @@ export const PLATFORM_RENDERERS: Record<string, (c: WidgetConfig) => RenderResul
       `<b style="font-size:16px">Maya Kowalski</b>` +
       `<div style="font-size:13px;color:var(--b-mut);margin:2px 0 10px">Design engineer · building PlanckUi in public</div>` +
       `<div style="font-size:12.5px;color:var(--b-mut)"><b style="color:var(--b-ink)">18,204</b> followers · <b style="color:var(--b-ink)">412</b> posts</div>`;
-    return { html: '<div class="pf-mini" style="' + pal("light", "#0a66c2") + ';max-width:380px">' + body + "</div>", css: PL_CSS };
+    return { html: '<div class="pf-mini" style="--b-accent:#0a66c2;max-width:380px">' + body + "</div>", css: PL_CSS };
   },
 };
