@@ -54,19 +54,30 @@ const DATA_DIR = process.env.PLANCKUI_DATA_DIR
   || (process.env.VERCEL === "1" ? "/tmp/planckui-data" : path.join(process.cwd(), ".data"));
 const DB_PATH = path.join(DATA_DIR, "db.json");
 
+/* Serverless instances don't share /tmp, and a read-only FS must never 500 an
+   auth route — so writes always land in memory first and touch disk only when
+   it works. Each instance stays self-consistent for its lifetime; the real
+   fix is the Postgres swap this interface is shaped for. */
+let mem: DBShape | null = null;
+
 function read(): DBShape {
   try {
     return JSON.parse(fs.readFileSync(DB_PATH, "utf8")) as DBShape;
   } catch {
-    return { users: [], collections: [], testimonials: [], widgets: [] };
+    return mem ?? { users: [], collections: [], testimonials: [], widgets: [] };
   }
 }
 
 function write(db: DBShape): void {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  const tmp = DB_PATH + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
-  fs.renameSync(tmp, DB_PATH);
+  mem = db;
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    const tmp = DB_PATH + ".tmp";
+    fs.writeFileSync(tmp, JSON.stringify(db, null, 2));
+    fs.renameSync(tmp, DB_PATH);
+  } catch {
+    /* disk unavailable — the in-memory copy above keeps this instance working */
+  }
 }
 
 export function uid(): string {

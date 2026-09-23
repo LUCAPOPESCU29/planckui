@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 /* Shown to guest workspaces: quiet, dismissible, and the one place email is
    ever asked for — purely optional, purely to save the workspace. */
 export function GuestBar() {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [email, setEmail] = useState("");
@@ -29,6 +31,8 @@ export function GuestBar() {
       return;
     }
     setState("done");
+    // the claim re-issued the session cookie; re-render so the bar bows out
+    window.setTimeout(() => router.refresh(), 1600);
   }
 
   return (

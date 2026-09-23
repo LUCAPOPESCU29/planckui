@@ -52,7 +52,7 @@ export function LoginForm() {
           type="email"
           required
           autoComplete="email"
-          className="input"
+          className="input rounded-full"
           placeholder="you@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -63,20 +63,20 @@ export function LoginForm() {
           {error}
         </p>
       )}
-      <button type="submit" className="btn btn-primary" disabled={busy}>
-        {busy ? "Opening…" : "Open my workspace"}
+      <button type="submit" className="btn btn-primary w-full rounded-full" disabled={busy}>
+        {busy ? "Opening…" : "Continue with email"}
       </button>
       <div className="flex items-center gap-3 text-xs text-ink-3">
         <span className="h-px flex-1 bg-[var(--line)]" />
         or
         <span className="h-px flex-1 bg-[var(--line)]" />
       </div>
-      <button type="button" className="btn btn-ghost" onClick={guest} disabled={busy}>
+      <button type="button" className="btn btn-ghost w-full rounded-full" onClick={guest} disabled={busy}>
         Skip — open a guest workspace
       </button>
-      <p className="text-sm text-ink-3">
-        Email is optional. Guests get the whole app — every widget, every block, no
-        email asked. Add one later only if you want this workspace saved to it.
+      <p className="text-sm leading-relaxed text-ink-3">
+        Email is optional. Guests get every widget and every block — add an address
+        only if you want this workspace saved to it.
       </p>
     </form>
   );

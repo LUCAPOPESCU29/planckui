@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { findUserByEmail, setUserEmail } from "@/lib/db";
-import { currentUserId } from "@/lib/auth";
+import { currentUserId, sessionCookie } from "@/lib/auth";
 
 /* Guests can add an email whenever they want — the workspace, its widgets
-   and collections stay exactly as they are. */
+   and collections stay exactly as they are. The session cookie is re-issued
+   so the stateless session itself now carries the email. */
 export async function POST(req: Request) {
   const userId = await currentUserId();
   if (!userId) {
@@ -26,5 +27,7 @@ export async function POST(req: Request) {
     );
   }
   setUserEmail(userId, email);
-  return NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set(sessionCookie(userId, email));
+  return res;
 }

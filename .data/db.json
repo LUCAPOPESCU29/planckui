@@ -19,6 +19,11 @@
       "id": "3a4e836c-af5",
       "email": null,
       "createdAt": "2026-09-23T09:09:53.045Z"
+    },
+    {
+      "id": "6a12b293-e31",
+      "email": null,
+      "createdAt": "2026-09-23T09:28:34.272Z"
     }
   ],
   "collections": [
@@ -49,6 +54,13 @@
       "name": "Customer love",
       "slug": "customer-love-3a4e836c-af5",
       "createdAt": "2026-09-23T09:09:53.050Z"
+    },
+    {
+      "id": "45805237-38c",
+      "userId": "6a12b293-e31",
+      "name": "Customer love",
+      "slug": "customer-love-6a12b293-e31",
+      "createdAt": "2026-09-23T09:28:34.279Z"
     }
   ],
   "testimonials": [
@@ -315,6 +327,72 @@
       "status": "pending",
       "tags": [],
       "createdAt": "2026-09-18T09:09:53.050Z"
+    },
+    {
+      "id": "ea7782b0-ded",
+      "collectionId": "45805237-38c",
+      "author": "Maya Okafor",
+      "role": "Founder, Fern & Co.",
+      "rating": 5,
+      "text": "I replaced a $25/month subscription with this in one afternoon. Pasted the snippet, and the wall of love just appeared on my homepage. Still slightly annoyed at how easy it was.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-23T09:28:34.279Z"
+    },
+    {
+      "id": "6837b88d-6c1",
+      "collectionId": "45805237-38c",
+      "author": "Tomás Rivera",
+      "role": "Runs a bike repair shop",
+      "rating": 5,
+      "text": "Customers started mentioning the reviews on my site. One said it was the reason she trusted me with her frame repair. That call paid for the year, which is funny, because the year was free.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-22T09:28:34.279Z"
+    },
+    {
+      "id": "d9f5bf9b-229",
+      "collectionId": "45805237-38c",
+      "author": "June Park",
+      "role": "Illustrator",
+      "rating": 4,
+      "text": "The collection form is better than the one I was paying for. Clients record a short video right in the browser and I approve it from my phone. Only wish the video files were smaller.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-21T09:28:34.279Z"
+    },
+    {
+      "id": "5eaccabe-ed7",
+      "collectionId": "45805237-38c",
+      "author": "Ade Balogun",
+      "role": "CTO, Lattice Labs",
+      "rating": 5,
+      "text": "The embed script is 9 KB, renders in a shadow root, and caused zero layout shift on a page I am scored on. This is how embeds should have worked all along.",
+      "status": "approved",
+      "tags": [],
+      "createdAt": "2026-09-20T09:28:34.279Z"
+    },
+    {
+      "id": "644e27e0-531",
+      "collectionId": "45805237-38c",
+      "author": "Sofia Lindqvist",
+      "role": "Bakery owner",
+      "rating": 5,
+      "text": "I am not a technical person. I copied the code, pasted it, and asked my nephew if it looked broken. It did not. The cake reviews look lovely.",
+      "status": "pending",
+      "tags": [],
+      "createdAt": "2026-09-19T09:28:34.279Z"
+    },
+    {
+      "id": "40a5f280-d89",
+      "collectionId": "45805237-38c",
+      "author": "Daniel Weiss",
+      "role": "Indie hacker",
+      "rating": 4,
+      "text": "Shipped my landing page with the marquee and the rating badge. Two widgets, ten minutes, zero dollars. The paid tool I removed had worse defaults.",
+      "status": "pending",
+      "tags": [],
+      "createdAt": "2026-09-18T09:28:34.279Z"
     }
   ],
   "widgets": [
@@ -385,6 +463,23 @@
         "maxWidth": 880
       },
       "createdAt": "2026-09-23T09:09:53.051Z"
+    },
+    {
+      "id": "cd904494-780",
+      "userId": "6a12b293-e31",
+      "type": "wall-of-love",
+      "name": "Homepage wall",
+      "collectionId": "45805237-38c",
+      "config": {
+        "theme": "light",
+        "accent": "oklch(0.47 0.1 203)",
+        "radius": 12,
+        "density": "cozy",
+        "showBadge": true,
+        "variant": "masonry",
+        "maxWidth": 880
+      },
+      "createdAt": "2026-09-23T09:28:34.280Z"
     }
   ]
 }

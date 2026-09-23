@@ -20,10 +20,14 @@ export async function POST(req: Request) {
 
   // returning users who removed everything still get a working start point
   if (collectionsFor(user.id).length === 0) {
-    createCollection(user.id, "Customer love");
+    try {
+      createCollection(user.id, "Customer love");
+    } catch {
+      /* read-only FS: the workspace still opens */
+    }
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(sessionCookie(user.id));
+  res.cookies.set(sessionCookie(user.id, user.email));
   return res;
 }
