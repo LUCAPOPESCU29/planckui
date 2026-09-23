@@ -26,11 +26,15 @@ const code = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "PlanckUi — 160+ free widgets for any website",
+    default: "PlanckUi — 290+ free widgets for any website",
     template: "%s · PlanckUi",
   },
   description:
-    "Collect and show testimonials, reviews, social feeds and more. 160+ free widgets for any website. No credit card. No limits. Just paste it.",
+    "Collect and show testimonials, reviews, social feeds and more. 290+ free widgets for any website. No credit card. No limits. Just paste it.",
+  verification: {
+    google: "XIry2rPCBglFdAN7t-QK_NcjoK3Qb5TZdvdMILdn3CI",
+  },
+  metadataBase: new URL("https://plank-ui.design"),
 };
 
 const themeInit = `
