@@ -96,7 +96,7 @@ export function WidgetPreview({
           src={themedSrc}
           title="Widget preview"
           className="w-full rounded-[var(--radius-md)] border border-line"
-          style={{ height: 560, background: "var(--surface)" }}
+          style={{ height: 560, background: "var(--surface)", ...style }}
         />
       </div>
     );

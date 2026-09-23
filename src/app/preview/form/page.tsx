@@ -13,9 +13,9 @@ export const metadata = { title: "Form preview" };
 export default async function PreviewFormPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cfg?: string; type?: string; theme?: string }>;
+  searchParams: Promise<{ cfg?: string; type?: string; theme?: string; compact?: string }>;
 }) {
-  const { cfg, type, theme } = await searchParams;
+  const { cfg, type, theme, compact } = await searchParams;
   const dark = theme !== "light"; // forms default to their designed dark look
   const formDef = getWidget("testimonial-form")!;
   let config: FormConfig = {
@@ -62,7 +62,8 @@ export default async function PreviewFormPage({
     return (
       <div className={dark ? "dark" : ""}>
         {pinScript}
-        <div className="min-h-screen p-4" style={{ background: "var(--bg)", color: "var(--ink)" }}>
+        {/* compact: sized to the form, for embeds that frame us tightly */}
+        <div className={`p-4 ${compact ? "" : "min-h-screen"}`} style={{ background: "var(--bg)", color: "var(--ink)" }}>
           <FormRouter type={type} slug="preview" cfg={{ headline, items }} demo embed />
         </div>
       </div>
