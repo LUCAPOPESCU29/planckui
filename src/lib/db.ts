@@ -163,6 +163,26 @@ async function readDb(): Promise<DBShape> {
   return localRead() ?? memo.data ?? EMPTY;
 }
 
+/* Bypasses the 3s memo for one read. Used after a miss on record getters:
+   the record may have been written through by another instance a moment
+   ago (create → navigate), while this one still holds a memo that predates
+   that write. Refreshes the memo so follow-up reads agree. */
+async function readDbFresh(): Promise<DBShape> {
+  memo.at = 0;
+  if (GH_API) {
+    try {
+      const db = await ghFetch();
+      memo.data = db;
+      memo.at = Date.now();
+      localWrite(db);
+      return db;
+    } catch {
+      return memo.data ?? localRead() ?? EMPTY;
+    }
+  }
+  return localRead() ?? memo.data ?? EMPTY;
+}
+
 async function writeDb(db: DBShape): Promise<void> {
   memo.data = db;
   memo.at = Date.now();
@@ -281,11 +301,16 @@ export async function collectionsFor(userId: string): Promise<Collection[]> {
 }
 
 export async function getCollection(id: string): Promise<Collection | undefined> {
-  return (await readDb()).collections.find((c) => c.id === id);
+  const hit = (await readDb()).collections.find((c) => c.id === id);
+  if (hit) return hit;
+  // miss could be the memo lagging a write that just landed on GitHub
+  return (await readDbFresh()).collections.find((c) => c.id === id);
 }
 
 export async function getCollectionBySlug(slug: string): Promise<Collection | undefined> {
-  return (await readDb()).collections.find((c) => c.slug === slug);
+  const hit = (await readDb()).collections.find((c) => c.slug === slug);
+  if (hit) return hit;
+  return (await readDbFresh()).collections.find((c) => c.slug === slug);
 }
 
 export async function createCollection(userId: string, name: string): Promise<Collection> {
@@ -370,7 +395,9 @@ export async function widgetsFor(userId: string): Promise<WidgetRecord[]> {
 }
 
 export async function getWidgetRecord(id: string): Promise<WidgetRecord | undefined> {
-  return (await readDb()).widgets.find((w) => w.id === id);
+  const hit = (await readDb()).widgets.find((w) => w.id === id);
+  if (hit) return hit;
+  return (await readDbFresh()).widgets.find((w) => w.id === id);
 }
 
 export async function createWidgetRecord(

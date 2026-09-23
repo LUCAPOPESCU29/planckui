@@ -5,7 +5,8 @@ import { currentUserId } from "@/lib/auth";
 export async function GET() {
   const userId = await currentUserId();
   if (!userId) return NextResponse.json({ error: "Sign in first." }, { status: 401 });
-  return NextResponse.json({ collections: collectionsFor(userId) });
+  const collections = await collectionsFor(userId);
+  return NextResponse.json({ collections });
 }
 
 export async function POST(req: Request) {
@@ -16,5 +17,8 @@ export async function POST(req: Request) {
   if (!name || name.length > 60) {
     return NextResponse.json({ error: "Give the collection a short name." }, { status: 400 });
   }
-  return NextResponse.json({ collection: createCollection(userId, name) });
+  // awaited: the response must carry the record, and the durable write must
+  // land before the client navigates to the new collection's page
+  const collection = await createCollection(userId, name);
+  return NextResponse.json({ collection });
 }
