@@ -22,6 +22,9 @@ export function SiteNav() {
             <Link href="/gallery" className="transition-colors hover:text-ink">
               Widgets
             </Link>
+            <Link href="/macbook-resources" className="transition-colors hover:text-ink">
+              MacBook Resources
+            </Link>
             <Link href="/animations" className="transition-colors hover:text-ink">
               Animations
             </Link>
