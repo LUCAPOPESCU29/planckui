@@ -16,7 +16,9 @@ import type { WidgetConfig } from "@/lib/widgets/types";
    live — colors, font, shape, effects — before saving anything. The exact
    same theming layer powers the embed, so what you see is what ships. */
 export function PublicCustomizer({ defId, autoFocus }: { defId: string; autoFocus?: boolean }) {
-  const [studio, setStudio] = useState(() => autoFocus === true);
+  const [studio, setStudio] = useState(
+    () => autoFocus === true || (typeof window !== "undefined" && window.location.search.includes("paint=1"))
+  );
   const wrapRef = useRef<HTMLDivElement>(null);
   const def = getWidget(defId);
   const [config, setConfig] = useState<WidgetConfig>(() => ({

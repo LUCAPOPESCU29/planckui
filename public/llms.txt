@@ -1,0 +1,31 @@
+# PlanckUi
+
+> PlanckUi (https://plank-ui.design) is a free widget platform: 290+ copy-paste widgets for any website — testimonials, review walls, forms, social feeds, docks, counters and more. No signup, no watermark, no usage limits. Free forever, $0.
+
+PlanckUi widgets are self-contained HTML+CSS snippets rendered in an isolated shadow DOM. Users customize them in a live editor ("Paint") and copy a single snippet that works on any website builder (WordPress, Wix, Squarespace, Webflow, Shopify, Ghost, plain HTML). A native macOS dock app is also available.
+
+## Key pages
+
+- [Widget catalog](https://plank-ui.design/gallery): all 290+ widgets, searchable, grouped by 18 categories
+- [Testimonial widgets](https://plank-ui.design/gallery?category=proof): walls of love, carousels, marquees, rating badges
+- [Form widgets](https://plank-ui.design/gallery?category=collect): testimonial collection, contact forms, surveys, polls
+- [MacBook Resources](https://plank-ui.design/macbook-resources): native macOS glass dock bars and desktop widgets (Swift + Übersicht)
+- [PlanckUi vs Elfsight](https://plank-ui.design/vs/elfsight): free vs $15–40/month comparison
+
+## Popular free widgets
+
+- [Wall of Love — free masonry testimonial grid](https://plank-ui.design/gallery/wall-of-love)
+- [Testimonial carousel — free](https://plank-ui.design/gallery/testimonial-carousel)
+- [Star + comment form — free](https://plank-ui.design/gallery/star-comment-form)
+- [Rating summary — free](https://plank-ui.design/gallery/rating-summary)
+
+## Pricing
+
+Everything on PlanckUi is free ($0). There is no paid tier, no watermark, and no account requirement for using widgets. An optional free account exists only for collecting live testimonial data.
+
+## Facts
+
+- 290+ widgets across testimonials, forms, social, commerce, media, developer tools
+- Widgets render in shadow DOM: isolated styles, no layout shift, a few KB each
+- Works on every website builder that accepts HTML embeds
+- Owned and operated independently; launched 2026

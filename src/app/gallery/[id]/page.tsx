@@ -1,182 +1,193 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CopyChip } from "@/components/CopyChip";
+import type { Metadata } from "next";
 import { PublicCustomizer } from "@/components/PublicCustomizer";
 import { SiteFooter, SiteNav } from "@/components/SiteChrome";
-import { getWidget } from "@/lib/widgets/registry";
+import { getWidget, LIVE_WIDGETS } from "@/lib/widgets/registry";
 import { CATEGORIES } from "@/lib/widgets/types";
+import { widgetCopy } from "@/lib/widget-copy";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+/* Widget detail pages — the programmatic SEO core. One page = one
+   "free <widget> for website" query, with a live demo (proprietary content),
+   full on-page copy, FAQ + SoftwareApplication schema, and copy-HTML export.
+   All 290+ pages prerender at build time. */
+
+export function generateStaticParams() {
+  return LIVE_WIDGETS.map((w) => ({ id: w.id }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const def = getWidget(id);
   if (!def) return {};
-  const suffix = def.status === "live" ? "free widget for your website" : "free widget, in build";
+  const copy = widgetCopy(def);
   return {
-    title: `${def.name} — ${suffix}`,
-    description: `${def.blurb} Free forever on PlanckUi — live preview, copy-paste embed, no credit card.`,
+    title: `${copy.title} · PlanckUi`,
+    description: copy.description,
+    alternates: { canonical: `/gallery/${def.id}` },
+    openGraph: {
+      title: `${copy.title} · PlanckUi`,
+      description: copy.description,
+      url: `/gallery/${def.id}`,
+      siteName: "PlanckUi",
+      type: "website",
+    },
+    twitter: { card: "summary_large_image", title: copy.title, description: copy.description },
   };
 }
 
-export default async function WidgetPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ paint?: string }> }) {
+export default async function WidgetPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { paint } = await searchParams;
   const def = getWidget(id);
   if (!def) notFound();
+  const copy = widgetCopy(def);
   const cat = CATEGORIES.find((c) => c.id === def.category);
+  const related = LIVE_WIDGETS.filter((w) => w.category === def.category && w.id !== def.id && w.status === "live").slice(0, 3);
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: copy.faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+  const appJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: def.name,
+    applicationCategory: "WebApplication",
+    operatingSystem: "Any",
+    description: copy.description,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
       <SiteNav />
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12 md:py-16">
-        <Link href="/gallery" className="text-sm text-ink-3 transition-colors hover:text-ink">
-          ← Catalog
-        </Link>
+        <nav aria-label="Breadcrumb" className="text-sm text-ink-3">
+          <Link href="/gallery" className="transition-colors hover:text-ink">
+            ← Catalog
+          </Link>
+          <span className="mx-2">/</span>
+          <span>{cat?.name}</span>
+        </nav>
 
-        <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-2xl">
-            <h1 className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold">{def.name}</h1>
-            <p className="mt-3 text-lg text-ink-2">{def.blurb}</p>
-            <p className="mt-2 text-sm text-ink-3">{cat?.name}</p>
-          </div>
-          <a
-            href={`/gallery/${def.id}?paint=1`}
-            className="btn btn-ghost"
-            title="Jump to the customizer"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 21v-4a4 4 0 1 1 4 4H3Z"/><path d="M21 3.2a1.2 1.2 0 0 0-1.7 0L11.5 11l1.5 1.5 7.8-7.8a1.2 1.2 0 0 0 0-1.7Z"/><path d="M11.5 11l1.5 1.5"/></svg>
-            Paint it
+        <div className="mt-4 max-w-2xl">
+          <h1 className="text-[clamp(1.8rem,3.4vw,2.6rem)] font-semibold leading-[1.08]">{copy.h1}</h1>
+          <p className="mt-3 text-lg text-ink-2">{def.blurb}</p>
+          <p className="mt-2 text-sm text-ink-3">{cat?.name}</p>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <a href="#customize" className="btn btn-primary">
+            Use it now — free
           </a>
-          {def.status === "live" ? (
-            <Link href={`/dashboard/widgets/new?type=${def.id}`} className="btn btn-primary">
-              Use this widget
-            </Link>
-          ) : (
-            <span className="rounded-full border border-line px-4 py-2 text-sm text-ink-3">
-              In build — not yet embeddable
-            </span>
-          )}
+          <Link href="/vs/elfsight" className="text-sm text-ink-3 underline underline-offset-2 hover:text-ink">
+            Why free? See how this compares to Elfsight →
+          </Link>
         </div>
 
-        {def.status === "live" ? (
-          <>
-            <div className="card mt-8 overflow-hidden p-4">
-              <PublicCustomizer defId={def.id} autoFocus={paint === "1"} />
-            </div>
+        <div className="card mt-8 overflow-hidden p-4" id="customize">
+          <PublicCustomizer defId={def.id} />
+        </div>
 
-            <div className="mt-12 grid gap-10 md:grid-cols-2">
-              <section aria-labelledby="how-h">
-                <h2 id="how-h" className="font-display text-lg font-semibold">
-                  Three steps, five minutes
-                </h2>
-                <ol className="mt-4 flex flex-col gap-4 text-[15px] text-ink-2">
-                  <li className="flex gap-3">
-                    <Step n={1} />
-                    <span>
-                      <strong className="font-medium text-ink">Add it.</strong> Click “Use this
-                      widget” — it lands in your dashboard with sensible defaults.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Step n={2} />
-                    <span>
-                      <strong className="font-medium text-ink">Tune it.</strong> Theme, accent
-                      color, radius, density — every change updates the live preview
-                      instantly.
-                    </span>
-                  </li>
-                  <li className="flex gap-3">
-                    <Step n={3} />
-                    <span>
-                      <strong className="font-medium text-ink">Paste it.</strong> One script tag,
-                      anywhere on any site. It renders in a shadow root and loads lazily, so
-                      your page speed never notices.
-                    </span>
-                  </li>
-                </ol>
-                <div className="mt-6">
-                  <CopyChip
-                    text={`<script async data-widget="YOUR_WIDGET_ID" src="https://your-planckui-url/api/embed/loader.js"></script>`}
-                    label="Snippet shape"
-                  />
-                  <p className="mt-2 text-xs text-ink-3">
-                    The real snippet with your widget&rsquo;s ID appears in the editor.
-                  </p>
-                </div>
-              </section>
-
-              <section aria-labelledby="opts-h">
-                <h2 id="opts-h" className="font-display text-lg font-semibold">
-                  What you can customize
-                </h2>
-                {def.controls && def.controls.length > 0 ? (
-                  <dl className="mt-4 flex flex-col divide-y divide-line rounded-[var(--radius-lg)] border border-line bg-surface">
-                    {def.controls.map((c) => (
-                      <div key={c.key} className="flex items-baseline justify-between gap-4 px-5 py-3">
-                        <dt className="text-sm font-medium">{c.label}</dt>
-                        <dd className="text-right text-xs text-ink-3">
-                          {labelForControl(c.type)}
-                          {c.help ? ` — ${c.help}` : ""}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : (
-                  <p className="mt-4 text-sm text-ink-3">
-                    Just the shared settings: theme, accent color, corner radius, density and
-                    the badge.
-                  </p>
-                )}
-              </section>
-            </div>
-          </>
-        ) : (
-          <div className="card mt-8 p-8">
-            <h2 className="font-display text-lg font-semibold">In build, honestly</h2>
-            <p className="mt-3 max-w-[65ch] text-ink-2">
-              This one is in the catalog because it is designed and scheduled, not because it
-              works today. Everything marked live really works — everything marked “in build”
-              really does not, yet. That is the whole deal.
-            </p>
-            <Link href="/gallery" className="btn btn-ghost btn-sm mt-6">
-              See what&rsquo;s live now
-            </Link>
+        {/* ---- what it is ---- */}
+        <section aria-labelledby="what-h" className="mt-14 max-w-3xl">
+          <h2 id="what-h" className="font-display text-xl font-semibold">
+            What is {def.name}?
+          </h2>
+          <div className="mt-4 flex flex-col gap-3 text-[15px] leading-relaxed text-ink-2">
+            {copy.whatIs.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
           </div>
+        </section>
+
+        {/* ---- features ---- */}
+        <section aria-labelledby="feat-h" className="mt-12 max-w-3xl">
+          <h2 id="feat-h" className="font-display text-xl font-semibold">
+            Everything included
+          </h2>
+          <ul className="mt-4 grid gap-2.5 text-[15px] text-ink-2">
+            {copy.features.map((f) => (
+              <li key={f} className="flex gap-2.5">
+                <span aria-hidden="true" className="mt-0.5 text-accent">✓</span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ---- 3 steps ---- */}
+        <section aria-labelledby="how-h" className="mt-12 max-w-3xl">
+          <h2 id="how-h" className="font-display text-xl font-semibold">
+            Add {def.name} to your website in 3 steps
+          </h2>
+          <ol className="mt-4 flex flex-col gap-4 text-[15px] text-ink-2">
+            {copy.steps.map((s, i) => (
+              <li key={s.title} className="flex gap-3">
+                <span
+                  aria-hidden="true"
+                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                  style={{ background: "var(--accent-soft)", color: "var(--accent-strong)" }}
+                >
+                  {i + 1}
+                </span>
+                <span>
+                  <strong className="font-medium text-ink">{s.title}.</strong> {s.body}
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 rounded-[var(--radius-md)] border border-line bg-surface p-4 text-sm text-ink-2">
+            {copy.compareLine} No watermark, no usage limits, no credit card.
+          </p>
+        </section>
+
+        {/* ---- FAQ + schema ---- */}
+        <section aria-labelledby="faq-h" className="mt-12 max-w-3xl">
+          <h2 id="faq-h" className="font-display text-xl font-semibold">
+            Frequently asked questions
+          </h2>
+          <dl className="mt-4 flex flex-col divide-y divide-line">
+            {copy.faqs.map((f) => (
+              <div key={f.q} className="py-4">
+                <dt className="font-medium">{f.q}</dt>
+                <dd className="mt-1.5 text-[15px] leading-relaxed text-ink-2">{f.a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        {/* ---- related (internal links) ---- */}
+        {related.length > 0 && (
+          <section aria-labelledby="rel-h" className="mt-12 max-w-3xl">
+            <h2 id="rel-h" className="font-display text-xl font-semibold">
+              More free widgets like this
+            </h2>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {related.map((r) => (
+                <li key={r.id}>
+                  <Link
+                    href={`/gallery/${r.id}`}
+                    className="inline-block rounded-full border border-line px-4 py-2 text-sm text-ink-2 transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {r.name} — free
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-4 text-sm text-ink-3">
+              Browse the <Link href="/gallery" className="text-accent hover:text-accent-strong">full catalog of 290+ free widgets</Link>.
+            </p>
+          </section>
         )}
       </main>
       <SiteFooter />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
     </div>
   );
-}
-
-function Step({ n }: { n: number }) {
-  return (
-    <span
-      aria-hidden="true"
-      className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-      style={{ background: "var(--accent-soft)", color: "var(--accent-strong)" }}
-    >
-      {n}
-    </span>
-  );
-}
-
-function labelForControl(t: string): string {
-  switch (t) {
-    case "theme":
-      return "light / dark";
-    case "color":
-      return "color picker + presets";
-    case "range":
-      return "slider";
-    case "toggle":
-      return "on / off";
-    case "select":
-      return "choice list";
-    case "textarea":
-      return "multi-line text";
-    case "date":
-      return "date and time";
-    default:
-      return "text";
-  }
 }
