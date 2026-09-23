@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { WidgetPreview } from "./WidgetPreview";
 import { renderWidget } from "@/lib/widgets/renderers";
 import { appIcon } from "@/lib/widgets/renderers/mac-icons";
+import { zip, SWIFT_MODE, PACKAGE_SWIFT, RUN_SH, readme } from "@/lib/swift-zip";
 import type { WidgetConfig } from "@/lib/widgets/types";
 
 /* MacBook Resources — docks and desktop widgets users install on their
@@ -96,6 +97,22 @@ async function buildFile(res: Resource, projectPath: string): Promise<string> {
     .replace("__CSS__", JSON.stringify(out.css + "\n" + positionCss(res.id)));
 }
 
+async function buildSwiftZip(res: Resource, projectPath: string): Promise<Blob> {
+  const mode = SWIFT_MODE[res.id] || "pro";
+  let swift = await fetch("/mac/PlanckDock.swift.template").then((r) => r.text());
+  swift = swift
+    .replace(/__NAME__/g, res.name)
+    .replace(/__MODE__/g, mode)
+    .replace(/__CITY__/g, "Chicago")
+    .replace(/__PROJECT_PATH__/g, projectPath);
+  return zip([
+    { path: "Package.swift", content: PACKAGE_SWIFT },
+    { path: "Sources/PlanckDock/main.swift", content: swift },
+    { path: "run.sh", content: RUN_SH, exec: true },
+    { path: "README.md", content: readme(res, projectPath) },
+  ]);
+}
+
 async function buildClockFile(res: Resource): Promise<string> {
   const out = renderWidget(res.id, res.config);
   return (
@@ -119,17 +136,18 @@ export function MacResources() {
     if (saved) setProjectPath(saved);
   }, []);
 
-  async function download(res: Resource) {
-    const file = res.kind === "interactive"
-      ? await buildFile(res, pathRef.current)
-      : await buildClockFile(res);
-    const blob = new Blob([file], { type: "text/javascript" });
+  async function download(res: Resource, variant: "swift" | "uebersicht") {
+    const name = variant === "swift" ? `planckui-${res.id}-mac.zip` : `planckui-${res.id}.jsx`;
+    const blob = variant === "swift"
+      ? await buildSwiftZip(res, pathRef.current)
+      : new Blob([res.kind === "interactive" ? await buildFile(res, pathRef.current) : await buildClockFile(res)],
+          { type: "text/javascript" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `planckui-${res.id}.jsx`;
+    a.download = name;
     a.click();
     URL.revokeObjectURL(a.href);
-    setDone(res.id);
+    setDone(res.id + variant);
     setTimeout(() => setDone(null), 2500);
   }
 
@@ -164,9 +182,15 @@ export function MacResources() {
               <h2 className="font-display text-lg font-semibold">{res.name}</h2>
               <p className="mt-1 text-sm text-ink-3">{res.desc}</p>
             </div>
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => download(res)}>
-              {done === res.id ? "Downloaded ✓" : "Download for Mac"}
-            </button>
+            <div className="flex flex-col items-stretch gap-2">
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => download(res, "swift")}>
+                {done === res.id + "swift" ? "Downloaded ✓" : "Native app · Swift"}
+              </button>
+              <button type="button" className="btn btn-sm border border-line bg-transparent text-ink-2 hover:border-accent hover:text-accent"
+                onClick={() => download(res, "uebersicht")}>
+                {done === res.id + "uebersicht" ? "Downloaded ✓" : "Übersicht version"}
+              </button>
+            </div>
           </div>
         </article>
       ))}
