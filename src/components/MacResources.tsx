@@ -1,0 +1,199 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { WidgetPreview } from "./WidgetPreview";
+import { renderWidget } from "@/lib/widgets/renderers";
+import { appIcon } from "@/lib/widgets/renderers/mac-icons";
+import { zip, SWIFT_MODE, PACKAGE_SWIFT, RUN_SH, readme } from "@/lib/swift-zip";
+import type { WidgetConfig } from "@/lib/widgets/types";
+
+/* MacBook Resources — docks and desktop widgets users install on their
+   physical Mac via Übersicht. Interactive resources download as stateful
+   widgets: apps auto-detected from /Applications (click to open), Now
+   Playing read live from Apple Music / Spotify, and a Vercel tile that
+   deploys the user's project with one click. */
+
+type Resource = {
+  id: string;
+  name: string;
+  desc: string;
+  kind: "interactive" | "clock";
+  music?: boolean;
+  vercel?: boolean;
+  config: WidgetConfig;
+};
+
+const RESOURCES: Resource[] = [
+  {
+    id: "dockpro",
+    name: "Dynamic Dock · Pro",
+    desc: "Live clock, Apple Music & Spotify Now Playing with real controls, Vercel one-click deploy, activity rings, network speeds, water tracker — and the apps row fills itself with what you have installed. Click an icon to open it.",
+    kind: "interactive",
+    music: true,
+    vercel: true,
+    config: {} as WidgetConfig,
+  },
+  {
+    id: "dockclassic",
+    name: "Classic Dock · Real Icons",
+    desc: "The clean macOS dock: real app icons with Apple-style magnification that follows your cursor, running indicators for open apps, Launchpad and Trash. Apps appear based on what you have installed.",
+    kind: "interactive",
+    config: {} as WidgetConfig,
+  },
+  {
+    id: "dockdev",
+    name: "Developer Dock",
+    desc: "Branch status, one-click Vercel production deploys with a building/ready ring, GitHub stars, Linear cycle and network throughput. Coming soon: live values from your repos.",
+    kind: "interactive",
+    vercel: true,
+    config: {} as WidgetConfig,
+  },
+  {
+    id: "deskclock",
+    name: "Desktop Clock & Weather",
+    desc: "The classic Übersicht desktop clock with your city, temperature and conditions. Big, thin, out of the way, live.",
+    kind: "clock",
+    config: {} as WidgetConfig,
+  },
+];
+
+const ICON_IDS = ["safari", "mail", "messages", "maps", "calendar", "photos", "music", "notes",
+  "terminal", "settings", "spotify", "discord", "telegram", "figma", "chrome", "notion",
+  "arc", "obsidian", "raycast", "whatsapp", "appstore", "vercel", "launchpad", "trash", "finder"];
+
+function iconsJson(): string {
+  const icons: Record<string, string> = {
+    play: '<svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    up: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M12 19V6M6 11l6-6 6 6"/></svg>',
+    clock: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    applemusic: appIcon("music", 18),
+    spotify: appIcon("spotify", 18),
+    vercel: appIcon("vercel", 22),
+    launchpad: appIcon("launchpad", 40),
+    trash: appIcon("trash", 40),
+  };
+  ICON_IDS.forEach((id) => { icons[id] = appIcon(id, 44); });
+  return JSON.stringify(icons);
+}
+
+function positionCss(id: string): string {
+  if (id === "deskclock") {
+    return ".md-fixture { position: fixed; top: 16%; left: 50%; transform: translateX(-50%); width: max-content; }";
+  }
+  return ".md-fixture { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 96vw; }\n" +
+    ".md-fixture .md-stage { padding: 5px 7px; border-radius: 24px; }\n" +
+    ".md-fixture .md-stage::before, .md-fixture .md-stage::after { display: none; }";
+}
+
+async function buildFile(res: Resource, projectPath: string): Promise<string> {
+  const tpl = await fetch("/mac/dock-widget.template.jsx").then((r) => r.text());
+  const out = renderWidget(res.id, res.config);
+  return tpl
+    .replace(/__NAME__/g, res.name)
+    .replace(/__PROJECT_PATH__/g, projectPath)
+    .replace(/__MUSIC__/g, res.music ? "1" : "0")
+    .replace(/__VERCEL__/g, res.vercel ? "1" : "0")
+    .replace(/__ICONS_JSON__/g, iconsJson())
+    .replace("__CSS__", JSON.stringify(out.css + "\n" + positionCss(res.id)));
+}
+
+async function buildSwiftZip(res: Resource, projectPath: string): Promise<Blob> {
+  const mode = SWIFT_MODE[res.id] || "pro";
+  let swift = await fetch("/mac/PlanckDock.swift.template").then((r) => r.text());
+  swift = swift
+    .replace(/__NAME__/g, res.name)
+    .replace(/__MODE__/g, mode)
+    .replace(/__CITY__/g, "Chicago")
+    .replace(/__PROJECT_PATH__/g, projectPath);
+  return zip([
+    { path: "Package.swift", content: PACKAGE_SWIFT },
+    { path: "Sources/PlanckDock/main.swift", content: swift },
+    { path: "run.sh", content: RUN_SH, exec: true },
+    { path: "README.md", content: readme(res, projectPath) },
+  ]);
+}
+
+async function buildClockFile(res: Resource): Promise<string> {
+  const out = renderWidget(res.id, res.config);
+  return (
+    `// PlanckUi — ${res.name}\n// Generated by planckui.vercel.app/macbook-resources\n` +
+    `// Install: place in ~/Library/Application Support/Übersicht/widgets/\n\n` +
+    `export const command = \`date "+%H:%M"\`;\nexport const refreshFrequency = 10000;\n\n` +
+    `export const className = ${JSON.stringify(out.css + "\n" + positionCss(res.id))};\n\n` +
+    `const html = ${JSON.stringify(out.html).replace(/18:16/g, "__TIME__")};\n\n` +
+    `export const render = ({ output }) => (<div dangerouslySetInnerHTML={{ __html: html.replace("__TIME__", (output || "").trim()) }} />);\n`
+  );
+}
+
+export function MacResources() {
+  const [done, setDone] = useState<string | null>(null);
+  const [projectPath, setProjectPath] = useState("~/dev/my-app");
+  const pathRef = useRef(projectPath);
+  pathRef.current = projectPath;
+
+  useEffect(() => {
+    const saved = localStorage.getItem("plk-project-path");
+    if (saved) setProjectPath(saved);
+  }, []);
+
+  async function download(res: Resource, variant: "swift" | "uebersicht") {
+    const name = variant === "swift" ? `planckui-${res.id}-mac.zip` : `planckui-${res.id}.jsx`;
+    const blob = variant === "swift"
+      ? await buildSwiftZip(res, pathRef.current)
+      : new Blob([res.kind === "interactive" ? await buildFile(res, pathRef.current) : await buildClockFile(res)],
+          { type: "text/javascript" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    setDone(res.id + variant);
+    setTimeout(() => setDone(null), 2500);
+  }
+
+  return (
+    <div className="grid gap-10">
+      <div className="rounded-[var(--radius-lg)] border border-line bg-surface p-5">
+        <label className="text-sm font-medium" htmlFor="ppath">
+          Vercel project folder <span className="font-normal text-ink-3">(used by the dock&rsquo;s deploy button)</span>
+        </label>
+        <input
+          id="ppath" className="input mt-2 max-w-md font-mono text-sm" value={projectPath}
+          onChange={(e) => {
+            setProjectPath(e.target.value);
+            localStorage.setItem("plk-project-path", e.target.value);
+          }}
+          placeholder="~/dev/my-app"
+        />
+        <p className="mt-2 text-xs text-ink-3">
+          The deploy tile runs <code className="font-mono">vercel deploy --prod</code> in this folder. Apps on the
+          dock auto-fill from <code className="font-mono">/Applications</code>; pin a custom set in{" "}
+          <code className="font-mono">~/.planckui-dock/apps.txt</code>.
+        </p>
+      </div>
+
+      {RESOURCES.map((res) => (
+        <article key={res.id} className="card overflow-hidden">
+          <div className="border-b border-line p-3">
+            <WidgetPreview type={res.id} config={res.config} className="overflow-hidden rounded-[var(--radius-md)]" />
+          </div>
+          <div className="flex flex-wrap items-center gap-4 p-5">
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-lg font-semibold">{res.name}</h2>
+              <p className="mt-1 text-sm text-ink-3">{res.desc}</p>
+            </div>
+            <div className="flex flex-col items-stretch gap-2">
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => download(res, "swift")}>
+                {done === res.id + "swift" ? "Downloaded ✓" : "Native app · Swift"}
+              </button>
+              <button type="button" className="btn btn-sm border border-line bg-transparent text-ink-2 hover:border-accent hover:text-accent"
+                onClick={() => download(res, "uebersicht")}>
+                {done === res.id + "uebersicht" ? "Downloaded ✓" : "Übersicht version"}
+              </button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}

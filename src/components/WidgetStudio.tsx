@@ -5,6 +5,7 @@ import { Control } from "./ControlField";
 import { WidgetPreview } from "./WidgetPreview";
 import { CopyChip } from "./CopyChip";
 import { renderWidget } from "@/lib/widgets/renderers";
+import { embedSnippet } from "@/lib/export-html";
 import { DESIGN_CONTROLS } from "@/lib/widgets/theme";
 import { DEMO_TESTIMONIALS } from "@/lib/widgets/demo-data";
 import { defaultsFor, getWidget } from "@/lib/widgets/registry";
@@ -62,12 +63,32 @@ export function WidgetStudio({ defId, onClose }: { defId: string; onClose: () =>
     if (isIframeWidget(defId)) return null;
     try { return renderWidget(defId, config, []); } catch { return null; }
   }, [defId, config]);
+  const snippet = useMemo(
+    () => embedSnippet(defId, config, [], typeof window !== "undefined" ? window.location.origin : ""),
+    [defId, config]
+  );
   const fullHtml = useMemo(() => {
-    if (rendered) {
-      return '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8">\n<style>body{display:grid;place-items:center;min-height:100vh;margin:0}\n' + rendered.css + '\n</style>\n</head>\n<body>\n' + rendered.html + '\n<script>' + (rendered.js || '') + '\n<' + '/script>\n</body>\n</html>';
+    const body = snippet.ok
+      ? snippet.snippet
+      : '<!DOCTYPE html>\n<html><body style="margin:0;display:grid;place-items:center;min-height:100vh">\n<iframe src="/preview/form?type=' + defId + '&cfg=' + encodeURIComponent(JSON.stringify(config)) + '&theme=auto" style="width:90%;height:640px;border:0"></iframe>\n</body></html>';
+    return '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="utf-8">\n<title>PlanckUi · ' + defId + '</title>\n</head>\n<body style="margin:0;display:grid;place-items:center;min-height:100vh;background:transparent">\n' + body + '\n</body>\n</html>';
+  }, [snippet, defId, config]);
+  const [copied, setCopied] = useState(false);
+  async function copyHtml() {
+    if (!snippet.ok) return;
+    try {
+      await navigator.clipboard.writeText(snippet.snippet);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = snippet.snippet;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
     }
-    return '<!DOCTYPE html>\n<html><body style="margin:0;display:grid;place-items:center;min-height:100vh">\n<iframe src="/preview/form?type=' + defId + '&cfg=' + encodeURIComponent(JSON.stringify(config)) + '" style="width:90%;height:640px;border:0"></iframe>\n</body></html>';
-  }, [rendered, defId, config]);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  }
   function downloadHtml() {
     const blob = new Blob([fullHtml], { type: 'text/html' });
     const a = document.createElement('a');
@@ -131,8 +152,12 @@ export function WidgetStudio({ defId, onClose }: { defId: string; onClose: () =>
           ))}
           <div className="border-t border-neutral-200 pt-4">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-400">Export</p>
+            <button type="button" onClick={copyHtml}
+              className="w-full rounded-[10px] border border-neutral-900 bg-neutral-900 px-3 py-2 text-sm font-semibold text-white transition-transform duration-150 hover:bg-neutral-700 active:scale-[0.98]">
+              {copied ? "Copied ✓ — paste it on your site" : "Copy HTML"}
+            </button>
             <button type="button" onClick={downloadHtml}
-              className="w-full rounded-[10px] border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-500">
+              className="mt-2 w-full rounded-[10px] border border-neutral-300 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-500">
               Download .html
             </button>
           </div>

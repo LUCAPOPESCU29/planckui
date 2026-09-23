@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   if (!def || def.status !== "live") {
     return NextResponse.json({ error: "Unknown widget." }, { status: 400 });
   }
-  const rec = createWidgetRecord(userId, {
+  const rec = await createWidgetRecord(userId, {
     type: def.id,
     name: String(body.name || "").trim() || def.name,
     collectionId: body.collectionId ? String(body.collectionId) : undefined,

@@ -11,8 +11,8 @@ function safeNext(raw: string | null): string {
   return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
-function guestResponse(req: Request): NextResponse {
-  const user = createUser(null);
+async function guestResponse(req: Request): Promise<NextResponse> {
+  const user = await createUser(null);
   const url = new URL(req.url);
   let res: NextResponse;
   if (req.method === "GET") {
@@ -25,9 +25,9 @@ function guestResponse(req: Request): NextResponse {
 }
 
 export async function POST(req: Request) {
-  return guestResponse(req);
+  return await guestResponse(req);
 }
 
 export async function GET(req: Request) {
-  return guestResponse(req);
+  return await guestResponse(req);
 }

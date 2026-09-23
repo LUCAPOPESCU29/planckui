@@ -20,13 +20,13 @@ export async function POST(req: Request) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ error: "That email doesn't look right." }, { status: 400 });
   }
-  if (findUserByEmail(email)) {
+  if (await findUserByEmail(email)) {
     return NextResponse.json(
       { error: "That email already has a workspace. Sign in instead — this guest workspace stays in this browser." },
       { status: 409 }
     );
   }
-  setUserEmail(userId, email);
+  await setUserEmail(userId, email);
   const res = NextResponse.json({ ok: true });
   res.cookies.set(sessionCookie(userId, email));
   return res;

@@ -7,7 +7,7 @@ export const metadata = { title: "My widgets" };
 
 export default async function WidgetsPage() {
   const user = await requireUser();
-  const widgets = widgetsFor(user.id);
+  const widgets = await widgetsFor(user.id);
 
   return (
     <div className="flex flex-col gap-8">

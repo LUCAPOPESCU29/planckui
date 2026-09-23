@@ -1,0 +1,584 @@
+// PlanckUi — __NAME__
+// Native macOS dock · Swift + AppKit (no dependencies)
+//
+// Run it:
+//   1. Install Xcode Command Line Tools once:  xcode-select --install
+//   2. In this folder:  swift run
+//   3. First launch, macOS asks for Automation permission — allow it, it powers
+//      Now Playing and app control.
+//
+// Customize:
+// · Pin dock apps: echo "Safari" >> ~/.planckui-dock/apps.txt  (one per line)
+// · Vercel project: change PROJECT_PATH below, then re-run
+// · Deploy status:  ~/.planckui-dock/deploy.status
+//
+// Quit: Option-click the clock · Mode: __MODE__
+
+import AppKit
+
+let MODE = "__MODE__"            // pro | classic | dev | clock
+let CITY = "__CITY__"
+let PROJECT_PATH = "__PROJECT_PATH__"
+let HOME = NSHomeDirectory()
+let DIR = HOME + "/.planckui-dock"
+let STATUS_FILE = DIR + "/deploy.status"
+
+// ---------------------------------------------------------------- shell
+@discardableResult
+func shell(_ script: String) -> String {
+    let p = Process()
+    p.executableURL = URL(fileURLWithPath: "/bin/zsh")
+    p.arguments = ["-c", script]
+    let pipe = Pipe()
+    p.standardOutput = pipe
+    p.standardError = FileHandle.nullDevice
+    do { try p.run() } catch { return "" }
+    let data = pipe.fileHandleForReading.readDataToEndOfFile()
+    return String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+}
+
+func trim(_ s: String) -> String { s.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+struct Track { let app: String; let title: String; let artist: String }
+
+func nowPlaying() -> Track? {
+    for app in ["Music", "Spotify"] {
+        let out = trim(shell(
+            "osascript -e 'tell application \"System Events\" to if exists (process \"\(app)\") then " +
+            "tell application \"\(app)\" to if player state is playing then return name of current track & \"|\" & artist of current track' 2>/dev/null"))
+        if !out.isEmpty {
+            let parts = out.components(separatedBy: "|")
+            return Track(app: app, title: parts.count > 0 ? parts[0] : "", artist: parts.count > 1 ? parts[1] : "")
+        }
+    }
+    return nil
+}
+
+func cpuLoad() -> Int {
+    let out = trim(shell("ps -A -o %cpu | awk '{s+=$1} END {print int(s+0.5)}'"))
+    return Int(out) ?? 0
+}
+
+func battery() -> Int {
+    let out = trim(shell("pmset -g batt | grep -Eo '[0-9]+%' | head -1 | tr -d '%'"))
+    return Int(out) ?? 100
+}
+
+func branch() -> String {
+    trim(shell("cd \(PROJECT_PATH) 2>/dev/null && git rev-parse --abbrev-ref HEAD 2>/dev/null")) 
+}
+
+// ---------------------------------------------------------------- model
+struct KnownApp {
+    let name: String      // app bundle name, e.g. "Google Chrome"
+    let icon: String      // icon id
+}
+
+let KNOWN_APPS: [KnownApp] = [
+    KnownApp(name: "Safari", icon: "safari"),
+    KnownApp(name: "Mail", icon: "mail"),
+    KnownApp(name: "Messages", icon: "messages"),
+    KnownApp(name: "Maps", icon: "maps"),
+    KnownApp(name: "Calendar", icon: "calendar"),
+    KnownApp(name: "Photos", icon: "photos"),
+    KnownApp(name: "Music", icon: "music"),
+    KnownApp(name: "Notes", icon: "notes"),
+    KnownApp(name: "Terminal", icon: "terminal"),
+    KnownApp(name: "Settings", icon: "settings"),
+    KnownApp(name: "Spotify", icon: "spotify"),
+    KnownApp(name: "Discord", icon: "discord"),
+    KnownApp(name: "Telegram", icon: "telegram"),
+    KnownApp(name: "Figma", icon: "figma"),
+    KnownApp(name: "Google Chrome", icon: "chrome"),
+    KnownApp(name: "Notion", icon: "notion"),
+    KnownApp(name: "Arc", icon: "arc"),
+    KnownApp(name: "Obsidian", icon: "obsidian"),
+    KnownApp(name: "Raycast", icon: "raycast"),
+    KnownApp(name: "Slack", icon: "slack"),
+]
+
+func installedApps() -> [KnownApp] {
+    let pinFile = DIR + "/apps.txt"
+    if FileManager.default.fileExists(atPath: pinFile) {
+        let pinned = trim(shell("cat \(pinFile)")).components(separatedBy: .newlines)
+            .map { trim($0) }.filter { !$0.isEmpty }
+        return pinned.map { KnownApp(name: $0, icon: "app") }
+    }
+    let fm = FileManager.default
+    return KNOWN_APPS.filter { fm.fileExists(atPath: "/Applications/\($0.name).app") }
+}
+
+func openApp(_ name: String) {
+    shell("open -a \"\(name)\"")
+}
+
+// ---------------------------------------------------------------- glass views
+final class GlassView: NSVisualEffectView {
+    override var allowsVibrancy: Bool { true }
+}
+
+final class RoundGlass: NSView {
+    override func viewDidMoveToWindow() {
+        wantsLayer = true
+        layer?.cornerRadius = 22
+        layer?.cornerCurve = .continuous
+        layer?.masksToBounds = true
+    }
+}
+
+func label(_ text: String, size: CGFloat, weight: NSFont.Weight, color: NSColor) -> NSTextField {
+    let l = NSTextField(labelWithString: text)
+    l.font = .systemFont(ofSize: size, weight: weight)
+    l.textColor = color
+    return l
+}
+
+func iconButton(_ symbol: String, filled: Bool = true, action: @escaping () -> Void) -> NSView {
+    let wrap = NSView()
+    wrap.wantsLayer = true
+    let btn = NSButton(title: "", target: nil, action: nil)
+    btn.isBordered = false
+    btn.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)?
+        .withSymbolConfiguration(.init(pointSize: 11, weight: .medium))
+    btn.contentTintColor = .white
+    btn.bezelStyle = .regularSquare
+    btn.layer?.backgroundColor = .clear
+    let chip = NSView()
+    chip.wantsLayer = true
+    chip.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.16).cgColor
+    chip.layer?.cornerRadius = 13
+    chip.frame = NSRect(x: 0, y: 0, width: 26, height: 26)
+    chip.autoresizingMask = [.width, .height]
+    wrap.addSubview(chip)
+    btn.frame = NSRect(x: 5, y: 4, width: 16, height: 18)
+    wrap.addSubview(btn)
+    wrap.frame = NSRect(x: 0, y: 0, width: 26, height: 26)
+    wrap.onClick(action)
+    return wrap
+}
+
+// click helper: attaches a handler to any NSView
+extension NSView {
+    func onClick(_ handler: @escaping () -> Void) {
+        let rec = ClickRecognizer(handler)
+        addGestureRecognizer(rec)
+    }
+}
+
+final class ClickRecognizer: NSGestureRecognizer {
+    private let handler: () -> Void
+    init(_ handler: @escaping () -> Void) {
+        self.handler = handler
+        super.init(target: nil, action: nil)
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    override func mouseDown(with event: NSEvent) { state = .began }
+    override func mouseUp(with event: NSEvent) {
+        if state == .began { handler(); state = .ended } else { state = .failed }
+    }
+}
+
+// ---------------------------------------------------------------- dock bar
+final class DockBar: NSStackView {
+    var iconViews: [(view: NSView, base: CGFloat)] = []
+    var clock: NSTextField?
+    var clockSub: NSTextField?
+    var musicTitle: NSTextField?
+    var musicArtist: NSTextField?
+    var musicRing: NSView?
+    var deployStatus: NSTextField?
+    var deployBtn: NSView?
+    var cpuLabel: NSTextField?
+    var branchLabel: NSTextField?
+
+    private var timerRunning = false
+    private var timerSeconds = 600
+    private var timerTimer: Timer?
+    private var deploying = false
+
+    func rebuild(mode: String) {
+        spacing = 12
+        edgeInsets = NSEdgeInsets(top: 10, left: 14, bottom: 8, right: 14)
+        orientation = .horizontal
+        alignment = .centerY
+
+        if mode == "clock" {
+            let big = label("--:--", size: 84, weight: .light, color: .white)
+            let sub = label("\(CITY) · \(battery())% · \(cpuLoad())% CPU", size: 15, weight: .medium, color: .white.withAlphaComponent(0.85))
+            clockSub = sub
+            addArrangedSubview(NSStackView(views: [big, sub]))
+            clock = big
+            return
+        }
+
+        if mode == "pro" || mode == "dev" {
+            // clock + city
+            let timeCol = NSStackView(views: [])
+            timeCol.orientation = .vertical
+            let t = label("--:--", size: mode == "pro" ? 22 : 18, weight: .light, color: .white)
+            timeCol.addArrangedSubview(t)
+            clock = t
+            if mode == "pro" {
+                timeCol.addArrangedSubview(label("\(CITY) ·−8h", size: 10.5, weight: .medium, color: .white.withAlphaComponent(0.6)))
+            } else {
+                branchLabel = label("main", size: 10.5, weight: .medium, color: .white.withAlphaComponent(0.6))
+                timeCol.addArrangedSubview(branchLabel!)
+            }
+            addArrangedSubview(timeCol)
+            addArrangedSubview(separator())
+
+            if mode == "dev" {
+                // vercel deploy
+                let ring = ringView(percent: 0, color: NSColor(red: 0.04, green: 0.52, blue: 1, alpha: 1), text: "▲")
+                deployStatus = label("deploy · idle", size: 12, weight: .semibold, color: .white)
+                let v = NSStackView(views: [ring, deployStatus!])
+                v.orientation = .horizontal
+                v.spacing = 9
+                v.onTapCompat { self.deploy() }
+                deployBtn = v
+                addArrangedSubview(v)
+                addArrangedSubview(separator())
+            }
+        }
+
+        if mode == "pro" {
+            // timer
+            let timerLabel = label("10:00", size: 15, weight: .medium, color: .white)
+            let play = NSButton(title: "", target: self, action: #selector(toggleTimer(_:)))
+            play.isBordered = false
+            play.image = NSImage(systemSymbolName: "play.fill", accessibilityDescription: "start timer")?
+                .withSymbolConfiguration(.init(pointSize: 10, weight: .bold))
+            play.contentTintColor = .white
+            let chip = chipView(26)
+            chip.addSubview(play)
+            play.frame = NSRect(x: 5, y: 4, width: 16, height: 18)
+            timerLabel.tag = 7
+            let tv = NSStackView(views: [timerLabel, chip])
+            tv.orientation = .horizontal
+            tv.spacing = 8
+            addArrangedSubview(tv)
+            addArrangedSubview(separator())
+        }
+
+        // now playing (pro only)
+        if mode == "pro" {
+            let title = label("Nothing playing", size: 12, weight: .semibold, color: .white.withAlphaComponent(0.65))
+            let artist = label("Apple Music · Spotify", size: 10.5, weight: .regular, color: .white.withAlphaComponent(0.55))
+            musicTitle = title
+            musicArtist = artist
+            let col = NSStackView(views: [title, artist])
+            col.orientation = .vertical
+            let tile = NSStackView(views: [artView(), col])
+            tile.orientation = .horizontal
+            tile.spacing = 9
+            tile.onTapCompat { self.playpause() }
+            addArrangedSubview(tile)
+            addArrangedSubview(separator())
+        }
+
+        // gauges (dev)
+        if mode == "dev" {
+            let ring = ringView(percent: 0, color: NSColor.systemOrange, text: "--")
+            cpuLabel = (ring.subviews.last?.subviews.first as? NSTextField)
+            addArrangedSubview(NSStackView(views: [ring, label("cpu", size: 10.5, weight: .medium, color: .white.withAlphaComponent(0.6))]))
+            addArrangedSubview(separator())
+        }
+
+        // apps
+        let apps = installedApps()
+        let row = NSStackView()
+        row.orientation = .horizontal
+        row.spacing = 8
+        row.alignment = .bottom
+        for (i, app) in apps.prefix(9).enumerated() {
+            let v = appIconView(app: app, size: mode == "classic" ? 50 : 38, index: i)
+            row.addArrangedSubview(v)
+            iconViews.append((v, 1))
+        }
+        addArrangedSubview(row)
+        addArrangedSubview(separator())
+
+        // vercel chip (pro)
+        if mode == "pro" {
+            let v = NSStackView(views: [])
+            v.orientation = .horizontal
+            v.spacing = 8
+            deployStatus = label("deploy", size: 11.5, weight: .semibold, color: .white)
+            v.addArrangedSubview(vercelIcon())
+            v.addArrangedSubview(deployStatus!)
+            v.onTapCompat { self.deploy() }
+            addArrangedSubview(v)
+            addArrangedSubview(separator())
+        }
+
+        // trash
+        let trash = iconFor(path: "/System/Library/CoreServices/Dock.app", fallback: "trash")
+        let tv2 = iconImageView(trash, size: mode == "classic" ? 46 : 34)
+        tv2.onTapCompat { self.openTrash() }
+        addArrangedSubview(tv2)
+
+        trackWithMouse()
+    }
+
+    // -- refresh live values
+    func refresh() {
+        let now = Date()
+        let f = DateFormatter(); f.dateFormat = "HH:mm"
+        clock?.stringValue = f.string(from: now)
+        if MODE == "clock", let sub = clockSub {
+            sub.stringValue = "\(CITY) · \(battery())% · \(cpuLoad())% CPU"
+        }
+        if MODE == "dev" { branchLabel?.stringValue = branch().isEmpty ? "main" : branch() }
+        DispatchQueue.global(qos: .utility).async {
+            let track = nowPlaying()
+            let cpu = MODE == "dev" ? cpuLoad() : 0
+            DispatchQueue.main.async {
+                if let t = track {
+                    self.musicTitle?.stringValue = t.title
+                    self.musicArtist?.stringValue = "\(t.artist) — \(t.app)"
+                } else if MODE == "pro" {
+                    self.musicTitle?.stringValue = "Nothing playing"
+                    self.musicArtist?.stringValue = "Apple Music · Spotify"
+                }
+                if MODE == "dev", let lbl = self.cpuLabel { lbl.stringValue = "\(cpu)" }
+            }
+        }
+    }
+
+    @objc func toggleTimer(_ sender: NSButton) {
+        timerRunning.toggle()
+        sender.image = NSImage(systemSymbolName: timerRunning ? "pause.fill" : "play.fill",
+                               accessibilityDescription: "timer")?
+            .withSymbolConfiguration(.init(pointSize: 10, weight: .bold))
+        if timerRunning {
+            timerTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                guard let self = self, self.timerRunning else { return }
+                self.timerSeconds = max(0, self.timerSeconds - 1)
+                self.updateTimerLabel()
+            }
+        } else {
+            timerTimer?.invalidate()
+        }
+    }
+
+    func updateTimerLabel() {}
+
+    func playpause() {
+        shell("osascript -e 'tell application \"Music\" to playpause' >/dev/null 2>&1; osascript -e 'tell application \"Spotify\" to playpause' >/dev/null 2>&1 &")
+    }
+
+    func openTrash() { shell("open -a Finder ~/.Trash") }
+
+    func deploy() {
+        guard !deploying else { return }
+        deploying = true
+        deployStatus?.stringValue = "building…"
+        try? FileManager.default.createDirectory(atPath: DIR, withIntermediateDirectories: true)
+        shell("echo building > \(STATUS_FILE)")
+        DispatchQueue.global(qos: .default).async {
+            _ = shell("cd \(PROJECT_PATH) 2>/dev/null && npx vercel deploy --prod >> ~/.planckui-dock/deploy.log 2>&1; echo ready >> \(STATUS_FILE)")
+            DispatchQueue.main.async {
+                self.deploying = false
+                self.deployStatus?.stringValue = "deploy · ready"
+            }
+        }
+    }
+
+    // -- magnification
+    private func trackWithMouse() {}
+    func separator() -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.14).cgColor
+        v.frame = NSRect(x: 0, y: 0, width: 1, height: 32)
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.widthAnchor.constraint(equalToConstant: 1).isActive = true
+        v.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        return v
+    }
+    func chipView(_ size: CGFloat) -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.16).cgColor
+        v.layer?.cornerRadius = size / 2
+        v.widthAnchor.constraint(equalToConstant: size).isActive = true
+        v.heightAnchor.constraint(equalToConstant: size).isActive = true
+        return v
+    }
+    func artView() -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor.clear.cgColor
+        v.layer?.cornerRadius = 8
+        let g = CAGradientLayer()
+        g.colors = [NSColor(red: 0.96, green: 0.83, blue: 0.4, alpha: 1).cgColor,
+                    NSColor(red: 0.55, green: 0.6, blue: 0.96, alpha: 1).cgColor]
+        g.startPoint = CGPoint(x: 0, y: 0); g.endPoint = CGPoint(x: 1, y: 1)
+        v.layer?.addSublayer(g)
+        v.widthAnchor.constraint(equalToConstant: 38).isActive = true
+        v.heightAnchor.constraint(equalToConstant: 38).isActive = true
+        return v
+    }
+    func vercelIcon() -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.backgroundColor = NSColor.black.cgColor
+        v.layer?.cornerRadius = 8
+        let l = label("▲", size: 13, weight: .bold, color: .white)
+        l.frame = NSRect(x: 0, y: 0, width: 28, height: 28)
+        v.addSubview(l)
+        v.widthAnchor.constraint(equalToConstant: 28).isActive = true
+        v.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        return v
+    }
+    func ringView(percent: Int, color: NSColor, text: String) -> NSView {
+        let v = NSView()
+        v.wantsLayer = true
+        let ring = CAShapeLayer()
+        ring.path = CGPath(ellipseIn: NSRect(x: 1.5, y: 1.5, width: 29, height: 29), transform: nil)
+        ring.strokeColor = color.cgColor
+        ring.fillColor = NSColor.black.withAlphaComponent(0.6).cgColor
+        ring.lineWidth = 3
+        ring.strokeEnd = CGFloat(percent) / 100
+        v.layer?.addSublayer(ring)
+        let l = label(text, size: 10, weight: .semibold, color: .white)
+        v.addSubview(l)
+        l.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([l.centerXAnchor.constraint(equalTo: v.centerXAnchor),
+                                     l.centerYAnchor.constraint(equalTo: v.centerYAnchor)])
+        v.widthAnchor.constraint(equalToConstant: 32).isActive = true
+        v.heightAnchor.constraint(equalToConstant: 32).isActive = true
+        return v
+    }
+    func iconFor(path: String, fallback: String) -> NSImage {
+        NSWorkspace.shared.icon(forFile: path)
+    }
+    func iconImageView(_ image: NSImage, size: CGFloat) -> NSView {
+        let v = NSView()
+        let iv = NSImageView()
+        iv.image = image
+        iv.imageScaling = .scaleProportionallyUpOrDown
+        iv.frame = NSRect(x: 0, y: 0, width: size, height: size)
+        v.addSubview(iv)
+        v.widthAnchor.constraint(equalToConstant: size).isActive = true
+        v.heightAnchor.constraint(equalToConstant: size).isActive = true
+        return v
+    }
+    func appIconView(app: KnownApp, size: CGFloat, index: Int) -> NSView {
+        let wrap = NSView()
+        let path = "/Applications/\(app.name).app"
+        let iv = NSImageView()
+        iv.image = NSWorkspace.shared.icon(forFile: path)
+        iv.imageScaling = .scaleProportionallyUpOrDown
+        iv.frame = NSRect(x: 0, y: 0, width: size, height: size)
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        wrap.addSubview(iv)
+        NSLayoutConstraint.activate([iv.topAnchor.constraint(equalTo: wrap.topAnchor),
+                                     iv.centerXAnchor.constraint(equalTo: wrap.centerXAnchor),
+                                     iv.widthAnchor.constraint(equalToConstant: size),
+                                     iv.heightAnchor.constraint(equalToConstant: size)])
+        let dot = NSView()
+        dot.wantsLayer = true
+        dot.layer?.backgroundColor = NSColor.white.withAlphaComponent(0.8).cgColor
+        dot.layer?.cornerRadius = 2
+        dot.translatesAutoresizingMaskIntoConstraints = false
+        wrap.addSubview(dot)
+        NSLayoutConstraint.activate([dot.topAnchor.constraint(equalTo: iv.bottomAnchor, constant: 4),
+                                     dot.centerXAnchor.constraint(equalTo: wrap.centerXAnchor),
+                                     dot.widthAnchor.constraint(equalToConstant: 4),
+                                     dot.heightAnchor.constraint(equalToConstant: 4)])
+        wrap.widthAnchor.constraint(equalToConstant: size + 2).isActive = true
+        wrap.heightAnchor.constraint(equalToConstant: size + 10).isActive = true
+        wrap.wantsLayer = true
+        wrap.layer?.transform = CATransform3DIdentity
+        wrap.onClick { openApp(app.name) }
+        return wrap
+    }
+}
+
+// tap helper for stack views
+extension NSView {
+    func onTapCompat(_ handler: @escaping () -> Void) { onClick(handler) }
+}
+
+// ---------------------------------------------------------------- panel
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    var panel: NSPanel!
+    var bar: DockBar!
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        try? FileManager.default.createDirectory(atPath: DIR, withIntermediateDirectories: true)
+        if !FileManager.default.fileExists(atPath: STATUS_FILE) {
+            shell("echo idle > \(STATUS_FILE)")
+        }
+
+        bar = DockBar()
+        bar.rebuild(mode: MODE)
+
+        let glass = GlassView()
+        glass.material = .hudWindow
+        glass.blendingMode = .behindWindow
+        glass.state = .active
+        glass.wantsLayer = true
+        glass.layer?.cornerRadius = 24
+        glass.layer?.cornerCurve = .continuous
+        glass.layer?.masksToBounds = true
+        glass.addSubview(bar)
+
+        let content = NSView()
+        content.addSubview(glass)
+        panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 1200, height: 96),
+                        styleMask: [.borderless, .nonactivatingPanel],
+                        backing: .buffered, defer: false)
+        panel.contentView = content
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
+        panel.level = .floating
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+
+        let screen = NSScreen.main ?? NSScreen.screens[0]
+        positionPanel(screen: screen)
+
+        // constraints: glass hugs bar, panel hugs glass
+        glass.translatesAutoresizingMaskIntoConstraints = false
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            glass.topAnchor.constraint(equalTo: content.topAnchor),
+            glass.bottomAnchor.constraint(equalTo: content.bottomAnchor),
+            glass.leftAnchor.constraint(equalTo: content.leftAnchor),
+            glass.rightAnchor.constraint(equalTo: content.rightAnchor),
+            bar.topAnchor.constraint(equalTo: glass.topAnchor, constant: 8),
+            bar.bottomAnchor.constraint(equalTo: glass.bottomAnchor, constant: -8),
+            bar.centerXAnchor.constraint(equalTo: glass.centerXAnchor),
+        ])
+
+        app.activate(ignoringOtherApps: true)
+        panel.alphaValue = 0
+        panel.orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.6
+            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.23, 1, 0.32, 1)
+            panel.animator().alphaValue = 1
+        }
+
+        let t = Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { [weak self] _ in
+            self?.bar.refresh()
+        }
+        t.tolerance = 0.5
+        RunLoop.main.add(t, forMode: .common)
+        bar.refresh()
+    }
+
+    func positionPanel(screen: NSScreen) {
+        let sf = screen.frame
+        panel.setFrameOrigin(NSPoint(x: sf.midX - panel.frame.width / 2, y: sf.minY + 8))
+    }
+}
+
+// ---------------------------------------------------------------- main
+let app = NSApplication.shared
+let delegate = AppDelegate()
+app.delegate = delegate
+app.setActivationPolicy(.accessory)
+app.run()

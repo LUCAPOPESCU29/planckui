@@ -13,34 +13,34 @@ export function Wordmark({ size = "base" }: { size?: "base" | "lg" }) {
 }
 
 export function SiteNav() {
+  const links = [
+    { href: "/gallery", label: "Widgets" },
+    { href: "/macbook-resources", label: "MacBook Resources" },
+    { href: "/animations", label: "Animations" },
+    { href: "/blocks", label: "Blocks" },
+    { href: "/#pricing", label: "Pricing" },
+  ];
   return (
-    <header className="border-b border-line">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <div className="flex items-center gap-8">
-          <Wordmark />
-          <nav className="hidden items-center gap-6 text-sm text-ink-2 sm:flex">
-            <Link href="/gallery" className="transition-colors hover:text-ink">
-              Widgets
+    <div className="sticky top-4 z-50 flex justify-center px-4">
+      <nav aria-label="Main" className="glass-pill-nav">
+        <Wordmark />
+        <div className="hidden items-center gap-1 text-sm text-ink-2 sm:flex">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="rounded-full px-3 py-1.5 transition-colors duration-150 hover:bg-surface-2 hover:text-ink"
+            >
+              {l.label}
             </Link>
-            <Link href="/animations" className="transition-colors hover:text-ink">
-              Animations
-            </Link>
-            <Link href="/blocks" className="transition-colors hover:text-ink">
-              Blocks
-            </Link>
-            <Link href="/#pricing" className="transition-colors hover:text-ink">
-              Pricing
-            </Link>
-          </nav>
+          ))}
         </div>
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <Link href="/dashboard" className="btn btn-primary btn-sm">
-            Open app
-          </Link>
-        </div>
-      </div>
-    </header>
+        <ThemeToggle />
+        <Link href="/dashboard" className="btn btn-primary rounded-full">
+          Open app
+        </Link>
+      </nav>
+    </div>
   );
 }
 

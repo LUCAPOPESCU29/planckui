@@ -7,7 +7,7 @@ import { addTestimonial, getCollection } from "@/lib/db";
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const userId = await currentUserId();
-  const col = getCollection(id);
+  const col = await getCollection(id);
   if (!userId || !col || col.userId !== userId) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
@@ -19,7 +19,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const [author, role, rating, ...rest] = line.split("|").map((p) => p.trim());
     const text = rest.join("|");
     if (!author || !text) continue;
-    addTestimonial({
+    await addTestimonial({
       collectionId: col.id,
       author: author.slice(0, 80),
       role: role && role !== "-" ? role.slice(0, 80) : undefined,

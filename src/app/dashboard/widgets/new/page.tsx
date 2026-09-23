@@ -11,7 +11,7 @@ export default async function NewWidgetPage({
 }) {
   const { type } = await searchParams;
   const user = await requireUser();
-  const cols = collectionsFor(user.id);
+  const cols = await collectionsFor(user.id);
   return (
     <div className="flex flex-col gap-8">
       <div>

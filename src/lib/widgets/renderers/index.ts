@@ -21,6 +21,7 @@ import { PLATFORM_RENDERERS } from "./platforms";
 import { PLATFORM_CARD_RENDERERS } from "./platform-card";
 import { IOSW_RENDERERS } from "./ios-weather";
 import { MAC_RENDERERS } from "./mac-widgets";
+import { MACOS_DOCK_RENDERERS } from "./macos-docks";
 import { themeCss } from "../theme";
 
 export type Renderer = (
@@ -233,6 +234,7 @@ export const RENDERERS: Record<string, Renderer> = {
   ...PLATFORM_CARD_RENDERERS,
   ...IOSW_RENDERERS,
   ...MAC_RENDERERS,
+  ...MACOS_DOCK_RENDERERS,
 };
 
 /* Form widgets embed as iframes (camera access, their own document, their own

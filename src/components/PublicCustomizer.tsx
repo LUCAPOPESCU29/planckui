@@ -9,6 +9,7 @@ import { DEMO_TESTIMONIALS } from "@/lib/widgets/demo-data";
 import { defaultsFor, getWidget } from "@/lib/widgets/registry";
 import { IFRAME_WIDGETS, isIframeWidget, previewIframeSrc } from "@/lib/widgets/renderers";
 import { ensureFontLink } from "@/lib/widgets/theme";
+import { embedSnippet } from "@/lib/export-html";
 import type { WidgetConfig } from "@/lib/widgets/types";
 
 /* The public customizer: anyone on a widget's catalog page can restyle it
@@ -23,6 +24,24 @@ export function PublicCustomizer({ defId, autoFocus }: { defId: string; autoFocu
     maxWidth: 900,
   }));
   const [saved, setSaved] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function copyHtml() {
+    const result = embedSnippet(defId, config, def?.needsCollection ? DEMO_TESTIMONIALS.slice(0, 5) : undefined);
+    if (!result.ok) return;
+    try {
+      await navigator.clipboard.writeText(result.snippet);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = result.snippet;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2200);
+  }
 
   useEffect(() => {
     if (config.dfnt) ensureFontLink(String(config.dfnt));
@@ -87,6 +106,9 @@ export function PublicCustomizer({ defId, autoFocus }: { defId: string; autoFocu
         <div className="flex flex-wrap items-center gap-3">
           <button type="button" className="btn btn-primary" onClick={save}>
             Save this version
+          </button>
+          <button type="button" className="btn" onClick={copyHtml}>
+            {copied ? "Copied ✓ — paste it on your site" : "Copy HTML"}
           </button>
           {saved && <CopyChip text={`${origin}/api/embed/loader.js`} label="Loader script" />}
           {saved && (

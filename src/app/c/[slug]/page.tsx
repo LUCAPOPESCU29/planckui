@@ -17,7 +17,7 @@ export default async function CollectionPage({
 }) {
   const { slug } = await params;
   const { embed, w } = await searchParams;
-  const col = getCollectionBySlug(slug);
+  const col = await getCollectionBySlug(slug);
   if (!col) notFound();
 
   const formDef = getWidget("testimonial-form")!;
@@ -29,7 +29,7 @@ export default async function CollectionPage({
   };
   let variant = "testimonial-form";
   if (w) {
-    const rec = getWidgetRecord(w);
+    const rec = await getWidgetRecord(w);
     if (rec && rec.collectionId === col.id) {
       variant = rec.type;
       if (variant === "testimonial-form" || variant === "star-comment-form") {
@@ -46,7 +46,7 @@ export default async function CollectionPage({
   // every iframe-collecting widget except the flagship forms renders through
   // the FormRouter; the flagship keeps its bespoke multi-step flow
   if (IFRAME_WIDGETS.has(variant) && variant !== "testimonial-form" && variant !== "star-comment-form") {
-    const rec = w ? getWidgetRecord(w) : undefined;
+    const rec = w ? await getWidgetRecord(w) : undefined;
     const def = getWidget(variant)!;
     const cfg = {
       headline: String(rec?.config.text || def.defaults?.text || def.name),
