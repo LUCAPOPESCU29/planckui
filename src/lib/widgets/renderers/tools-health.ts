@@ -1,4 +1,5 @@
 import type { WidgetConfig } from "../types";
+import { baseCss } from "../base";
 import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 
 /* 25 health, fitness and wellbeing mini-tools. Estimates use published
@@ -7,7 +8,7 @@ import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 type R = (c: WidgetConfig) => { html: string; css: string; js?: string };
 
 const out = (c: WidgetConfig, html: string, js = "", extra = ""): { html: string; css: string; js?: string } =>
-  ({ html: toolShell(c, html), css: TOOL_CSS + extra, js });
+  ({ html: toolShell(c, html), css: baseCss(c, TOOL_CSS + extra), js });
 
 function fxC(c: WidgetConfig, body: string): string {
   return "var f=shadow.getElementById('plk-f');" + "function calc(){" + body + "}" + "f.addEventListener('input',calc);f.addEventListener('change',calc);calc()";

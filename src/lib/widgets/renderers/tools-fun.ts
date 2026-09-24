@@ -1,4 +1,5 @@
 import type { WidgetConfig } from "../types";
+import { baseCss } from "../base";
 import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 
 /* 25 fun tools, timers and generators. Everything runs locally in the shadow
@@ -8,7 +9,7 @@ import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 type R = (c: WidgetConfig) => { html: string; css: string; js?: string };
 
 const out = (c: WidgetConfig, html: string, js = "", extra = ""): { html: string; css: string; js?: string } =>
-  ({ html: toolShell(c, html), css: TOOL_CSS + extra, js });
+  ({ html: toolShell(c, html), css: baseCss(c, TOOL_CSS + extra), js });
 
 const BTN = '<button type="button" class="plk-btn" id="plk-go">Roll</button>';
 const OUT = '<dl class="plk-out"><dt>Result</dt><dd id="plk-o1" style="font-size:30px">—</dd></dl>';

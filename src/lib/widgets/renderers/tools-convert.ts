@@ -1,4 +1,5 @@
 import type { WidgetConfig } from "../types";
+import { baseCss } from "../base";
 import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 
 /* 25 unit and text converters. Two live fields per widget — edit either side
@@ -7,7 +8,7 @@ import { fieldRow, TOOL_CSS, toolShell } from "./kit";
 type R = (c: WidgetConfig) => { html: string; css: string; js?: string };
 
 const out = (c: WidgetConfig, html: string, js = ""): { html: string; css: string; js?: string } =>
-  ({ html: toolShell(c, html), css: TOOL_CSS, js });
+  ({ html: toolShell(c, html), css: baseCss(c, TOOL_CSS), js });
 
 const two = (la: string, lb: string, unitA = "", unitB = ""): string =>
   fieldRow(la, `<input type="number" step="any" data-side="a" class="plk-a" placeholder="0"><span class="plk-lab">${unitA}</span>`) +

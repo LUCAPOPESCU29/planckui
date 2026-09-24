@@ -13,6 +13,7 @@ export function esc(s: unknown): string {
    leak into (or inherit from) the host page. Emits vanilla CSS on purpose:
    embeds must not ship a framework. */
 export function baseCss(c: WidgetConfig, css: string): string {
+  const customAccent = String(c.accent ?? "").trim() !== "";
   return `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :host {
@@ -39,7 +40,7 @@ export function baseCss(c: WidgetConfig, css: string): string {
   --w-card: oklch(0.245 0.015 218);
   --w-ink: oklch(0.93 0.008 200);
   --w-muted: oklch(0.68 0.015 208);
-  --w-line: oklch(0.32 0.016 218);
+  --w-line: oklch(0.32 0.016 218);${customAccent ? "" : "\n  --w-accent: oklch(0.78 0.085 197);"}
   line-height: 1.62;
 }
 :host { background: var(--w-bg); }
