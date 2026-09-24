@@ -1,10 +1,10 @@
-# PlanckUi — 190+ free widgets for any website
+# PlanckUi — 395+ free widgets for any website
 
 A free-first widget platform: the Elfsight catalog model with a Testimonial.to-grade
 testimonial suite as the flagship. Every widget is free, forever. The only things that will
 ever cost money: removing the badge, custom domains, white-label embeds, team seats.
 
-**Status: 190 of 190 catalog entries are live.** — including the 35-widget "Pretty Progress" premium dark collection. The catalog does not fake completeness —
+**Status: 395 of 395 catalog entries are live.** — including the 35-widget "Pretty Progress" premium dark collection. The catalog does not fake completeness —
 if it says live, it runs real code in the gallery, the editor, and the embed.
 
 ## Run it

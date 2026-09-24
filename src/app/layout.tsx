@@ -26,7 +26,7 @@ const code = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "PlanckUi — 290+ free widgets for any website",
+    default: "PlanckUi — 395+ free widgets for any website",
     template: "%s · PlanckUi",
   },
   description:
