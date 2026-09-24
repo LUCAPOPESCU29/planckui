@@ -13,8 +13,10 @@ const out = (c: WidgetConfig, html: string, js = "", extra = ""): { html: string
 function fxC(c: WidgetConfig, body: string): string {
   return "var f=shadow.getElementById('plk-f');" + "function calc(){" + body + "}" + "f.addEventListener('input',calc);f.addEventListener('change',calc);calc()";
 }
-const num = (name: string, label: string, ph = "", extra = ""): string =>
-  fieldRow(label, `<input type="number" name="${name}" step="any" placeholder="${ph}" ${extra} required>`);
+const num = (name: string, label: string, ph = "", extra = ""): string => {
+  const example = /^[0-9][0-9.]*$/.test(ph);
+  return fieldRow(label, `<input type="number" name="${name}" step="any" ${example ? `value="${ph}"` : `placeholder="${ph}"`} ${extra} required>`);
+};
 const sel = (name: string, label: string, opts: string[]): string =>
   fieldRow(label, `<select name="${name}">${opts.map((o) => `<option>${o}</option>`).join("")}</select>`);
 const dt = (name: string, label: string): string =>

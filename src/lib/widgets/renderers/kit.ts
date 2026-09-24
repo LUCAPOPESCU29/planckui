@@ -10,36 +10,42 @@ export const SOFT =
 
 export const TOOL_CSS = `
 .plk-tool {
-  max-width: 400px; margin-inline: auto; padding: 24px;
+  max-width: 420px; margin-inline: auto; padding: 28px 26px 26px;
   background: var(--w-card);
-  border: 1px solid color-mix(in oklab, var(--w-ink) 12%, var(--w-line));
-  border-radius: calc(var(--w-radius) + 4px);
+  border: 1px solid color-mix(in oklab, var(--w-ink) 7%, var(--w-line));
+  border-radius: calc(var(--w-radius) + 8px);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--w-ink) 4%, transparent),
+    0 16px 40px -12px color-mix(in oklab, var(--w-ink) 10%, transparent);
 }
-.plk-tool h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 16px; }
-.plk-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.plk-lab { font-size: 12.5px; color: var(--w-muted); }
+.plk-tool h3 { font-size: 17px; font-weight: 650; letter-spacing: -0.015em; margin: 0 0 20px; }
+.plk-row { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.plk-lab { font-size: 13px; font-weight: 500; color: color-mix(in oklab, var(--w-ink) 78%, var(--w-muted)); }
 .plk-row input, .plk-row select, .plk-row textarea {
-  font: inherit; font-size: 15px; padding: 11px 12px;
+  font: inherit; font-size: 15px; padding: 12px 14px;
   background: var(--w-bg);
-  border: 1px solid color-mix(in oklab, var(--w-ink) 16%, var(--w-line));
-  border-radius: calc(var(--w-radius) - 4px);
+  border: 1px solid color-mix(in oklab, var(--w-ink) 8%, var(--w-line));
+  border-radius: calc(var(--w-radius) + 0px);
   color: var(--w-ink); width: 100%;
-  transition: border-color 160ms ease;
+  transition: border-color 200ms cubic-bezier(0.16,1,0.3,1), box-shadow 200ms cubic-bezier(0.16,1,0.3,1), background-color 200ms cubic-bezier(0.16,1,0.3,1);
+  caret-color: var(--w-accent);
 }
 .plk-row input:hover, .plk-row select:hover, .plk-row textarea:hover {
-  border-color: color-mix(in oklab, var(--w-ink) 30%, var(--w-line));
+  border-color: color-mix(in oklab, var(--w-ink) 18%, var(--w-line));
 }
 .plk-row input:focus, .plk-row textarea:focus, .plk-row select:focus {
-  outline: none; border-color: var(--w-ink); background: var(--w-card);
+  outline: none; background: var(--w-card); border-color: var(--w-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--w-accent) 16%, transparent);
 }
-.plk-row input::placeholder, .plk-row textarea::placeholder { color: var(--w-muted); opacity: 0.6; }
+.plk-row input::placeholder, .plk-row textarea::placeholder { color: var(--w-muted); opacity: 0.55; }
 .plk-out {
-  margin-top: 20px; padding: 16px 0 2px;
-  border-top: 1px solid color-mix(in oklab, var(--w-ink) 14%, var(--w-line));
+  margin-top: 24px; padding: 16px 18px;
+  background: var(--w-bg);
+  border-radius: calc(var(--w-radius) + 2px);
 }
-.plk-out dt { font-size: 12px; color: var(--w-muted); margin-bottom: 2px; }
+.plk-out dt { font-size: 12px; font-weight: 500; color: var(--w-muted); margin-bottom: 3px; }
 .plk-out dd {
-  margin: 0 0 12px; font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+  margin: 0 0 14px; font-size: 23px; font-weight: 650; letter-spacing: -0.025em;
   font-variant-numeric: tabular-nums; color: var(--w-ink);
 }
 .plk-out dd:last-child { margin-bottom: 0; }
@@ -47,13 +53,13 @@ export const TOOL_CSS = `
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   border: 0; cursor: pointer; width: 100%;
   background: var(--w-ink); color: var(--w-bg);
-  font: inherit; font-weight: 600; font-size: 14.5px; letter-spacing: -0.01em;
-  padding: 12px 18px; border-radius: calc(var(--w-radius) - 2px);
-  transition: background-color 160ms ease, transform 160ms ease;
+  font: inherit; font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+  padding: 13px 18px; border-radius: calc(var(--w-radius) + 0px);
+  transition: background-color 200ms cubic-bezier(0.16,1,0.3,1), transform 160ms cubic-bezier(0.16,1,0.3,1);
 }
-.plk-btn:hover { background: color-mix(in oklab, var(--w-ink) 85%, var(--w-bg)); }
+.plk-btn:hover { background: color-mix(in oklab, var(--w-ink) 88%, var(--w-accent)); }
 .plk-btn:active { transform: scale(0.98); }
-input[type=range].plk-range { accent-color: var(--w-ink); padding: 0; width: 100%; height: 28px; }
+input[type=range].plk-range { accent-color: var(--w-accent); padding: 0; width: 100%; height: 28px; }
 .plk-lab.plk-center { font-size: 13px; font-weight: 500; }
 `;
 

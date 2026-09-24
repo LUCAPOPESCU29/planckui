@@ -14,8 +14,10 @@ const out = (c: WidgetConfig, html: string, js = ""): RenderResult2 =>
 const sel = (name: string, label: string, opts: string[], def = ""): string =>
   fieldRow(label, `<select name="${name}">${opts.map((o) => `<option${o === def ? " selected" : ""}>${esc(o)}</option>`).join("")}</select>`);
 
-const num = (name: string, label: string, ph = "", extra = ""): string =>
-  fieldRow(label, `<input type="number" name="${name}" step="any" placeholder="${esc(ph)}" ${extra} required>`);
+const num = (name: string, label: string, ph = "", extra = ""): string => {
+  const example = /^[0-9][0-9.]*$/.test(ph);
+  return fieldRow(label, `<input type="number" name="${name}" step="any" ${example ? `value="${ph}"` : `placeholder="${esc(ph)}"`} ${extra} required>`);
+};
 
 function fx(c: WidgetConfig, body: string): string {
   return "var f=shadow.getElementById('plk-f');" + "function calc(){" + body + "}" + "f.addEventListener('input',calc);f.addEventListener('change',calc);calc()";
