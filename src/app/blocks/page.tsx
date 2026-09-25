@@ -3,6 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { SiteFooter, SiteNav } from "@/components/SiteChrome";
+import {
+  DarkIsland,
+  DarkLaunch,
+  DarkNowPlaying,
+  DarkPay,
+  DarkSettings,
+  LightControlCenter,
+  LightRings,
+  LightSettingsList,
+  LightSpotlight,
+  LightWidgets,
+} from "@/app/blocks/dark-light-blocks";
 
 /* Blocks — shadcn-inspired sections rebuilt in PlanckUi's design law with
    Apple-flavored surfaces: frosted floating nav (glass only on the
@@ -1275,6 +1287,16 @@ const BLOCKS = [
   ["faq-block", "FAQ 01", "Row accordion"],
   ["cta-block", "CTA 01", "Dark glow panel"],
   ["login-block", "Login 01", "Frosted sign-in card"],
+  ["dark-launch-block", "Dark 01", "Launch hero"],
+  ["dark-settings-block", "Dark 02", "System settings window"],
+  ["dark-playing-block", "Dark 03", "Now playing card"],
+  ["dark-island-block", "Dark 04", "Dynamic island"],
+  ["dark-pay-block", "Dark 05", "One-tap checkout"],
+  ["light-rings-block", "Light 01", "Activity rings card"],
+  ["light-widgets-block", "Light 02", "Home screen widgets"],
+  ["light-spotlight-block", "Light 03", "Spotlight search"],
+  ["light-settings-block", "Light 04", "iOS settings list"],
+  ["light-cc-block", "Light 05", "Control center"],
 ];
 
 export default function BlocksPage() {
@@ -1403,6 +1425,46 @@ export default function BlocksPage() {
           desc="A calm card with passkey first-class, honest demo feedback, no alerts."
         >
           <LoginDemo />
+        </SectionBlock>
+
+        <section className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+          <div className="rounded-[18px] p-6 text-center" style={{ background: "linear-gradient(120deg,#0b0f12,#12333a 55%,#123a2a)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <p className="text-[13px] text-white/85">
+              <b className="font-medium text-white">Part III — Dark & Light.</b> A petrol and mint
+              collection: five near-black canvases, five white ones, Apple hardware energy in every one.
+            </p>
+          </div>
+        </section>
+
+        <SectionBlock id="dark-launch-block" tag="Dark 01" title="Launch hero" desc="Event keynote energy — petrol glow, mint accent word, film CTA.">
+          <DarkLaunch />
+        </SectionBlock>
+        <SectionBlock id="dark-settings-block" tag="Dark 02" title="System settings window" desc="macOS-style window with working mint switches.">
+          <DarkSettings />
+        </SectionBlock>
+        <SectionBlock id="dark-playing-block" tag="Dark 03" title="Now playing" desc="Petrol-to-mint art, live progress, working play state.">
+          <DarkNowPlaying />
+        </SectionBlock>
+        <SectionBlock id="dark-island-block" tag="Dark 04" title="Dynamic island" desc="Click to morph — the pill expands into a live player.">
+          <DarkIsland />
+        </SectionBlock>
+        <SectionBlock id="dark-pay-block" tag="Dark 05" title="One-tap checkout" desc="Pay button that confirms with a mint check.">
+          <DarkPay />
+        </SectionBlock>
+        <SectionBlock id="light-rings-block" tag="Light 01" title="Activity rings" desc="Three petrol and mint rings on an editorial white card.">
+          <LightRings />
+        </SectionBlock>
+        <SectionBlock id="light-widgets-block" tag="Light 02" title="Home screen widgets" desc="A calendar tile and a credits tile, iOS widget grammar.">
+          <LightWidgets />
+        </SectionBlock>
+        <SectionBlock id="light-spotlight-block" tag="Light 03" title="Spotlight search" desc="Live-filtering results with keyboard hints.">
+          <LightSpotlight />
+        </SectionBlock>
+        <SectionBlock id="light-settings-block" tag="Light 04" title="iOS settings list" desc="Grouped inset rows with real toggle switches.">
+          <LightSettingsList />
+        </SectionBlock>
+        <SectionBlock id="light-cc-block" tag="Light 05" title="Control center" desc="Connectivity dots, focus toggle and a brightness slider.">
+          <LightControlCenter />
         </SectionBlock>
 
         <section className="mx-auto max-w-6xl px-6 pb-24">
