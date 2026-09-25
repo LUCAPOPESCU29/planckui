@@ -22,6 +22,7 @@ import { PLATFORM_CARD_RENDERERS } from "./platform-card";
 import { IOSW_RENDERERS } from "./ios-weather";
 import { MAC_RENDERERS } from "./mac-widgets";
 import { MACOS_DOCK_RENDERERS } from "./macos-docks";
+import { APPLE_RENDERERS } from "./apple-widgets";
 import { themeCss } from "../theme";
 import * as toolsMore from "./tools-more";
 import * as healthTools from "./tools-health";
@@ -342,6 +343,7 @@ export const RENDERERS: Record<string, Renderer> = {
   ...IOSW_RENDERERS,
   ...MAC_RENDERERS,
   ...MACOS_DOCK_RENDERERS,
+  ...APPLE_RENDERERS,
 };
 
 /* Form widgets embed as iframes (camera access, their own document, their own

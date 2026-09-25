@@ -78,7 +78,8 @@ export type CategoryId =
   | "special"
   | "platforms"
   | "weather"
-  | "mac";
+  | "mac"
+  | "apple";
 
 export interface WidgetDef {
   id: string;
@@ -110,4 +111,5 @@ export const CATEGORIES: { id: CategoryId; name: string }[] = [
   { id: "platforms", name: "Platforms — real brands, real logos" },
   { id: "weather", name: "Weather — the Apple-style collection" },
   { id: "mac", name: "Mac — docks & desktop, Apple-style" },
+  { id: "apple", name: "Cupertino — iOS patterns, Apple-style" },
 ];

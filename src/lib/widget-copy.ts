@@ -74,6 +74,10 @@ const CATEGORY_ANGLE: Record<string, { angle: string; useCase: string }> = {
     angle: "Weather widgets in the cleanest design language there is — glanceable and beautiful.",
     useCase: "Perfect for sidebars, dashboards and personal homepages.",
   },
+  apple: {
+    angle: "The iOS design language — the most imitated interface on earth — rebuilt as embeddable website widgets with its exact tokens: SF type, system colors, continuous corners.",
+    useCase: "Perfect for product pages, waitlists, portfolios and anything that wants Apple-grade polish.",
+  },
   mac: {
     angle: "macOS design language, running on your website — docks, menus and desktop widgets.",
     useCase: "Great for portfolio pages, launch pages and anything that wants to feel like a Mac.",
