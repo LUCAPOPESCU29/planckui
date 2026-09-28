@@ -19,6 +19,7 @@ export function SiteNav() {
     { href: "/animations", label: "Animations" },
     { href: "/blocks", label: "Blocks" },
     { href: "/navigations", label: "Navigations" },
+    { href: "/landing-pages", label: "Landing Pages" },
     { href: "/#pricing", label: "Pricing" },
   ];
   return (
