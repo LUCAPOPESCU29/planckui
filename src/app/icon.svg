@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- PlanckUi mark: petrol tile, monoline pUi, mint tittle -->
+  <rect width="64" height="64" rx="14" fill="#22707E"/>
+  <g fill="none" stroke="#F4F7F8" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M13 23v28"/>
+    <path d="M13 24h9a9 9 0 0 1 0 18h-9"/>
+    <path d="M36 24v11a8 8 0 0 0 16 0V24"/>
+    <path d="M58.5 27v15"/>
+  </g>
+  <circle cx="58.5" cy="17.5" r="3.4" fill="#8FD6A8"/>
+</svg>
