@@ -56,6 +56,18 @@ import {
   NightTerminal,
   NightTiles,
 } from "@/app/blocks/gallery-c";
+import {
+  AppleAppStore,
+  AppleAirPods,
+  AppleIntelligence,
+  AppleKeyboard,
+  AppleNotifications,
+  AppleProductHero,
+  AppleTileGrid,
+  AppleTVBanner,
+  AppleTwoFactor,
+  AppleWatchStrip,
+} from "@/app/blocks/apple-blocks";
 
 /* Blocks — shadcn-inspired sections rebuilt in PlanckUi's design law with
    Apple-flavored surfaces: frosted floating nav (glass only on the
@@ -1373,6 +1385,16 @@ const BLOCKS = [
   ["night-podcast-block", "Night 09", "Podcast episode"],
   ["night-cta-block", "Night 10", "Gradient CTA"],
   ["night-faq-block", "Night 11", "FAQ two columns"],
+  ["apple-hero-block", "Apple 01", "Product hero"],
+  ["apple-tiles-block", "Apple 02", "Product tile grid"],
+  ["apple-tv-block", "Apple 03", "TV+ banner"],
+  ["apple-intel-block", "Apple 04", "Intelligence card"],
+  ["apple-notes-block", "Apple 05", "Notification stack"],
+  ["apple-store-block", "Apple 06", "App Store card"],
+  ["apple-watch-block", "Apple 07", "Watch rings strip"],
+  ["apple-keyboard-block", "Apple 08", "QuickType keyboard"],
+  ["apple-airpods-block", "Apple 09", "AirPods pairing"],
+  ["apple-2fa-block", "Apple 10", "Two-factor sheet"],
 ];
 
 export default function BlocksPage() {
@@ -1675,6 +1697,46 @@ export default function BlocksPage() {
         </SectionBlock>
         <SectionBlock id="night-faq-block" tag="Night 11" title="FAQ, two columns" desc="A light breather — four answers, two columns.">
           <FaqTwoCol />
+        </SectionBlock>
+        <section className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+          <div className="rounded-[18px] px-6 py-5 text-center" style={{ background: "linear-gradient(120deg,#f5f5f7,#e8e8ed)", border: "1px solid rgba(0,0,0,0.06)" }}>
+            <p className="text-[13px] text-ink-2">
+              <b className="font-medium text-ink">Part VII — Apple originals.</b> Ten sections in
+              the Cupertino grammar: product heroes, tile grids, notifications, QuickType,
+              Apple Intelligence and an autofill sheet.
+            </p>
+          </div>
+        </section>
+
+        <SectionBlock id="apple-hero-block" tag="Apple 01" title="Product hero" desc="The keynote slide: name, two links, full-bleed hardware.">
+          <AppleProductHero />
+        </SectionBlock>
+        <SectionBlock id="apple-tiles-block" tag="Apple 02" title="Product tile grid" desc="Six homepage tiles with Learn more and Buy.">
+          <AppleTileGrid />
+        </SectionBlock>
+        <SectionBlock id="apple-tv-block" tag="Apple 03" title="TV+ banner" desc="A cinematic title on a darkened still.">
+          <AppleTVBanner />
+        </SectionBlock>
+        <SectionBlock id="apple-intel-block" tag="Apple 04" title="Intelligence card" desc="Petrol-mint glow around an on-device summary.">
+          <AppleIntelligence />
+        </SectionBlock>
+        <SectionBlock id="apple-notes-block" tag="Apple 05" title="Notification stack" desc="Grouped, blurred and offset, iOS style.">
+          <AppleNotifications />
+        </SectionBlock>
+        <SectionBlock id="apple-store-block" tag="Apple 06" title="App Store card" desc="GET button, ratings strip, in-app purchases.">
+          <AppleAppStore />
+        </SectionBlock>
+        <SectionBlock id="apple-watch-block" tag="Apple 07" title="Watch rings strip" desc="Three rings and the numbers beside them.">
+          <AppleWatchStrip />
+        </SectionBlock>
+        <SectionBlock id="apple-keyboard-block" tag="Apple 08" title="QuickType keyboard" desc="Suggestions and keys, phone-framed.">
+          <AppleKeyboard />
+        </SectionBlock>
+        <SectionBlock id="apple-airpods-block" tag="Apple 09" title="AirPods pairing" desc="Connect state with Adaptive Audio copy.">
+          <AppleAirPods />
+        </SectionBlock>
+        <SectionBlock id="apple-2fa-block" tag="Apple 10" title="Two-factor sheet" desc="The autofill pill, tapped once.">
+          <AppleTwoFactor />
         </SectionBlock>
         <section className="mx-auto max-w-6xl px-6 pb-24">
           <Reveal>
