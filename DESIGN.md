@@ -71,3 +71,17 @@ both appearances.
 - Ambient loops (marquee, hero float) pause on hover and vanish under
   `prefers-reduced-motion`, which settles every animation instantly.
 - Transform and opacity only. Never animate layout.
+
+## 7. Dark & Light collection + The gallery (35 more blocks)
+
+Three further collections joined the page: a ten-piece **Dark & Light** set
+(five near-black canvases, five white ones) and a twenty-five piece gallery —
+twelve app surfaces, eleven after-dark showpieces, twelve marketing staples.
+
+Palette additions, used sparingly: a **mint** accent
+(`oklch(0.82 0.14 152)` on dark, `oklch(0.62 0.13 152)` on light) sits beside
+the petrol; everything else stays monochrome ink on charcoal (`#0b0f12`) or
+white. Apple hardware energy is the theme — Dynamic Island, Control Center,
+Activity rings, Pay — rendered with inline styles so exports stay
+self-contained. Motion law unchanged: springs only for the island morph,
+everything else under 300 ms ease-out.

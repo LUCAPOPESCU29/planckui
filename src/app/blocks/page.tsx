@@ -15,6 +15,47 @@ import {
   LightSpotlight,
   LightWidgets,
 } from "@/app/blocks/dark-light-blocks";
+import {
+  MktgAvatarStack,
+  MktgBlog,
+  MktgChangelog,
+  MktgFeatureGrid,
+  MktgHowItWorks,
+  MktgLogoWall,
+  MktgNewsletter,
+  MktgPricingCompare,
+  MktgSplitCTA,
+  MktgSpotlight,
+  MktgStats,
+  MktgTeam,
+} from "@/app/blocks/gallery-a";
+import {
+  AppActivity,
+  AppCalendar,
+  AppCommandPalette,
+  AppDash,
+  AppEmpty,
+  AppFilters,
+  AppInvoice,
+  AppKanban,
+  AppNotifications,
+  AppOnboarding,
+  AppUpgrade,
+  AppUpload,
+} from "@/app/blocks/gallery-b";
+import {
+  FaqTwoCol,
+  NightCode,
+  NightCTA,
+  NightHero,
+  NightMetrics,
+  NightPodcast,
+  NightPricing,
+  NightProfile,
+  NightQuotes,
+  NightTerminal,
+  NightTiles,
+} from "@/app/blocks/gallery-c";
 
 /* Blocks — shadcn-inspired sections rebuilt in PlanckUi's design law with
    Apple-flavored surfaces: frosted floating nav (glass only on the
@@ -1297,6 +1338,41 @@ const BLOCKS = [
   ["light-spotlight-block", "Light 03", "Spotlight search"],
   ["light-settings-block", "Light 04", "iOS settings list"],
   ["light-cc-block", "Light 05", "Control center"],
+  ["app-dash-block", "App 01", "Dashboard header"],
+  ["app-notifications-block", "App 02", "Notification center"],
+  ["app-palette-block", "App 03", "Command palette"],
+  ["app-kanban-block", "App 04", "Kanban column"],
+  ["app-activity-block", "App 05", "Activity feed"],
+  ["app-invoice-block", "App 06", "Invoice table"],
+  ["app-empty-block", "App 07", "Empty state"],
+  ["app-onboarding-block", "App 08", "Onboarding steps"],
+  ["app-upload-block", "App 09", "Upload card"],
+  ["app-calendar-block", "App 10", "Mini calendar"],
+  ["app-filters-block", "App 11", "Filter chips"],
+  ["app-upgrade-block", "App 12", "Upgrade card"],
+  ["mktg-features-block", "Mktg 01", "Feature grid"],
+  ["mktg-logos-block", "Mktg 02", "Logo wall"],
+  ["mktg-spotlight-block", "Mktg 03", "Testimonial spotlight"],
+  ["mktg-stats-block", "Mktg 04", "Stats band"],
+  ["mktg-split-block", "Mktg 05", "Split CTA"],
+  ["mktg-newsletter-block", "Mktg 06", "Newsletter capture"],
+  ["mktg-team-block", "Mktg 07", "Team grid"],
+  ["mktg-blog-block", "Mktg 08", "Blog cards"],
+  ["mktg-compare-block", "Mktg 09", "Pricing compare"],
+  ["mktg-changelog-block", "Mktg 10", "Changelog list"],
+  ["mktg-avatars-block", "Mktg 11", "Avatar stack"],
+  ["mktg-how-block", "Mktg 12", "How it works"],
+  ["night-hero-block", "Night 01", "Launch hero"],
+  ["night-tiles-block", "Night 02", "Feature tiles"],
+  ["night-metrics-block", "Night 03", "Metrics band"],
+  ["night-quotes-block", "Night 04", "Paired quotes"],
+  ["night-code-block", "Night 05", "Code card"],
+  ["night-terminal-block", "Night 06", "Terminal"],
+  ["night-pricing-block", "Night 07", "Pricing card"],
+  ["night-profile-block", "Night 08", "Profile card"],
+  ["night-podcast-block", "Night 09", "Podcast episode"],
+  ["night-cta-block", "Night 10", "Gradient CTA"],
+  ["night-faq-block", "Night 11", "FAQ two columns"],
 ];
 
 export default function BlocksPage() {
@@ -1467,6 +1543,139 @@ export default function BlocksPage() {
           <LightControlCenter />
         </SectionBlock>
 
+        <section className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+          <div className="rounded-[18px] border border-line bg-[var(--surface-2)] px-6 py-5 text-center">
+            <p className="text-[13px] text-ink-2">
+              <b className="font-medium text-ink">Part VI — Marketing staples.</b> Twelve light
+              sections every site eventually needs: proof, people, pricing and posts.
+            </p>
+          </div>
+        </section>
+
+        <SectionBlock id="mktg-features-block" tag="Mktg 01" title="Feature grid" desc="Four pillars with petrol icon plates.">
+          <MktgFeatureGrid />
+        </SectionBlock>
+        <SectionBlock id="mktg-logos-block" tag="Mktg 02" title="Logo wall" desc="Six wordmarks that ink in on hover.">
+          <MktgLogoWall />
+        </SectionBlock>
+        <SectionBlock id="mktg-spotlight-block" tag="Mktg 03" title="Testimonial spotlight" desc="One big quote with a metric chip.">
+          <MktgSpotlight />
+        </SectionBlock>
+        <SectionBlock id="mktg-stats-block" tag="Mktg 04" title="Stats band" desc="Four hairline-divided numbers.">
+          <MktgStats />
+        </SectionBlock>
+        <SectionBlock id="mktg-split-block" tag="Mktg 05" title="Split CTA" desc="Copy left, two calls right, one card.">
+          <MktgSplitCTA />
+        </SectionBlock>
+        <SectionBlock id="mktg-newsletter-block" tag="Mktg 06" title="Newsletter capture" desc="Input, button, promise.">
+          <MktgNewsletter />
+        </SectionBlock>
+        <SectionBlock id="mktg-team-block" tag="Mktg 07" title="Team grid" desc="Initials, names, roles — four across.">
+          <MktgTeam />
+        </SectionBlock>
+        <SectionBlock id="mktg-blog-block" tag="Mktg 08" title="Blog cards" desc="Image cards with tags and read times.">
+          <MktgBlog />
+        </SectionBlock>
+        <SectionBlock id="mktg-compare-block" tag="Mktg 09" title="Pricing compare" desc="Free versus Pro, row by row.">
+          <MktgPricingCompare />
+        </SectionBlock>
+        <SectionBlock id="mktg-changelog-block" tag="Mktg 10" title="Changelog list" desc="Version pills with dated entries.">
+          <MktgChangelog />
+        </SectionBlock>
+        <SectionBlock id="mktg-avatars-block" tag="Mktg 11" title="Avatar stack" desc="Overlapping circles and a five-star row.">
+          <MktgAvatarStack />
+        </SectionBlock>
+        <SectionBlock id="mktg-how-block" tag="Mktg 12" title="How it works" desc="Three steps, two arrows, zero ceremony.">
+          <MktgHowItWorks />
+        </SectionBlock>
+        <section className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+          <div className="rounded-[18px] border border-line bg-[var(--surface-2)] px-6 py-5 text-center">
+            <p className="text-[13px] text-ink-2">
+              <b className="font-medium text-ink">Part IV — App surfaces.</b> Twelve working
+              product-UI sections: dashboards, feeds, palettes, empty states — the pieces a
+              real site needs after the marketing pages are done.
+            </p>
+          </div>
+        </section>
+
+        <SectionBlock id="app-dash-block" tag="App 01" title="Dashboard header" desc="Greeting, live counts and the primary action.">
+          <AppDash />
+        </SectionBlock>
+        <SectionBlock id="app-notifications-block" tag="App 02" title="Notification center" desc="Unread dots, names, and time — scannable in one glance.">
+          <AppNotifications />
+        </SectionBlock>
+        <SectionBlock id="app-palette-block" tag="App 03" title="Command palette" desc="A ⌘K launcher that filters as you type — try it.">
+          <AppCommandPalette />
+        </SectionBlock>
+        <SectionBlock id="app-kanban-block" tag="App 04" title="Kanban column" desc="Cards with tag chips and assignee stacks.">
+          <AppKanban />
+        </SectionBlock>
+        <SectionBlock id="app-activity-block" tag="App 05" title="Activity feed" desc="A timeline with avatars and connecting lines.">
+          <AppActivity />
+        </SectionBlock>
+        <SectionBlock id="app-invoice-block" tag="App 06" title="Invoice table" desc="Line items with a tabular total footer.">
+          <AppInvoice />
+        </SectionBlock>
+        <SectionBlock id="app-empty-block" tag="App 07" title="Empty state" desc="Teaches the next action instead of apologizing.">
+          <AppEmpty />
+        </SectionBlock>
+        <SectionBlock id="app-onboarding-block" tag="App 08" title="Onboarding steps" desc="A three-step checklist with live states.">
+          <AppOnboarding />
+        </SectionBlock>
+        <SectionBlock id="app-upload-block" tag="App 09" title="Upload card" desc="Dropzone plus an in-flight file with progress.">
+          <AppUpload />
+        </SectionBlock>
+        <SectionBlock id="app-calendar-block" tag="App 10" title="Mini calendar" desc="Click a day — the footer follows your selection.">
+          <AppCalendar />
+        </SectionBlock>
+        <SectionBlock id="app-filters-block" tag="App 11" title="Filter chips" desc="Category chips with a live result count.">
+          <AppFilters />
+        </SectionBlock>
+        <SectionBlock id="app-upgrade-block" tag="App 12" title="Upgrade card" desc="Free-plan honesty with a soft glow accent.">
+          <AppUpgrade />
+        </SectionBlock>
+        <section className="mx-auto max-w-6xl px-6 pt-4 pb-2">
+          <div className="rounded-[18px] p-6 text-center" style={{ background: "linear-gradient(120deg,#0b0f12,#1a2333 55%,#0f2f26)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <p className="text-[13px] text-white/85">
+              <b className="font-medium text-white">Part V — After dark.</b> Eleven near-black
+              showpieces: petrol glows, mint signals, code, terminals and one last CTA.
+            </p>
+          </div>
+        </section>
+
+        <SectionBlock id="night-hero-block" tag="Night 01" title="Launch hero" desc="Glow first, copy second — the cinematic opener.">
+          <NightHero />
+        </SectionBlock>
+        <SectionBlock id="night-tiles-block" tag="Night 02" title="Feature tiles" desc="Three mint ticks on charcoal.">
+          <NightTiles />
+        </SectionBlock>
+        <SectionBlock id="night-metrics-block" tag="Night 03" title="Metrics band" desc="Four numbers separated by hairline light.">
+          <NightMetrics />
+        </SectionBlock>
+        <SectionBlock id="night-quotes-block" tag="Night 04" title="Paired quotes" desc="Two testimonials, mint quotation marks.">
+          <NightQuotes />
+        </SectionBlock>
+        <SectionBlock id="night-code-block" tag="Night 05" title="Code card" desc="Filename tab, line numbers and a copy chip.">
+          <NightCode />
+        </SectionBlock>
+        <SectionBlock id="night-terminal-block" tag="Night 06" title="Terminal" desc="Ship the night build in five lines.">
+          <NightTerminal />
+        </SectionBlock>
+        <SectionBlock id="night-pricing-block" tag="Night 07" title="Single pricing card" desc="One plan, one button, no carousel.">
+          <NightPricing />
+        </SectionBlock>
+        <SectionBlock id="night-profile-block" tag="Night 08" title="Profile card" desc="Avatar, stats row and a quiet follow.">
+          <NightProfile />
+        </SectionBlock>
+        <SectionBlock id="night-podcast-block" tag="Night 09" title="Podcast episode" desc="Play state, duration and chapter chips.">
+          <NightPodcast />
+        </SectionBlock>
+        <SectionBlock id="night-cta-block" tag="Night 10" title="Gradient border CTA" desc="A petrol-to-mint frame around the ask.">
+          <NightCTA />
+        </SectionBlock>
+        <SectionBlock id="night-faq-block" tag="Night 11" title="FAQ, two columns" desc="A light breather — four answers, two columns.">
+          <FaqTwoCol />
+        </SectionBlock>
         <section className="mx-auto max-w-6xl px-6 pb-24">
           <Reveal>
             <div className="card p-8 text-center">
