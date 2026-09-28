@@ -31,16 +31,7 @@ export default function LandingPage() {
             feeds and small tools. Nothing useful is paywalled. No credit card, no limits,
             just paste it.
           </p>
-          <div className="rise rise-3 mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/gallery" className="btn btn-primary">
-              Browse the catalog
-            </Link>
-            <Link href="/dashboard" className="btn btn-ghost">
-              Start collecting
-            </Link>
-          </div>
-
-          <div className="rise rise-4 mx-auto mt-14 max-w-4xl">
+          <div className="rise rise-3 mx-auto mt-12 max-w-4xl">
             <div className="card overflow-hidden">
               <div className="flex items-center gap-2 border-b border-line px-4 py-2.5">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: "var(--line-2)" }} />
@@ -55,21 +46,14 @@ export default function LandingPage() {
               zero tricks. It is free. So is everything else on this page.
             </p>
           </div>
-        </section>
 
-        {/* ---------------- Interest: gapless bento of live widgets ---------------- */}
-        <section className="mx-auto max-w-6xl px-6 py-24 md:py-40">
-          <div className="max-w-2xl">
-            <h2 className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold">
-              A catalog, not a teaser.
-            </h2>
-            <p className="mt-4 text-ink-2">
-              Most widget sites show you a screenshot and a paywall. These are running right
-              now, on this page, with the same code you will embed.
-            </p>
-          </div>
-          <div className="mt-10">
-            <LiveBento />
+          <div className="rise rise-4 mt-10 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/gallery" className="btn btn-primary">
+              Browse the catalog
+            </Link>
+            <Link href="/dashboard" className="btn btn-ghost">
+              Start collecting
+            </Link>
           </div>
         </section>
 
@@ -88,10 +72,52 @@ export default function LandingPage() {
           </div>
         </section>
 
+
+        {/* ---------------- Interest: gapless bento of live widgets ---------------- */}
+        <section className="mx-auto max-w-6xl px-6 py-24 md:py-40">
+          <div className="max-w-2xl">
+            <h2 className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold">
+              A catalog, not a teaser.
+            </h2>
+            <p className="mt-4 text-ink-2">
+              Most widget sites show you a screenshot and a paywall. These are running right
+              now, on this page, with the same code you will embed.
+            </p>
+          </div>
+          <div className="mt-10">
+            <LiveBento />
+          </div>
+        </section>
+
         {/* ---------------- Desire ---------------- */}
         <section className="mx-auto max-w-6xl px-6 py-24 md:py-40">
           <div className="grid gap-12 md:grid-cols-2">
-            <div className="self-start md:sticky md:top-24">
+            <div className="md:order-2">
+              <DesireRight>
+                <DesireItem
+                  name="Testimonial spotlight"
+                  note="Rotates daily"
+                  type="testimonial-spotlight"
+                  config={{ ...defaultsFor(getWidget("testimonial-spotlight")!) }}
+                  items={DEMO_TESTIMONIALS}
+                />
+                <DesireItem
+                  name="Tip calculator"
+                  note="Runs entirely in your page"
+                  type="tip-calculator"
+                  config={{ ...defaultsFor(getWidget("tip-calculator")!) }}
+                />
+                <DesireItem
+                  name="Rating summary"
+                  note="Real math, real stars"
+                  type="rating-summary"
+                  config={{ ...defaultsFor(getWidget("rating-summary")!) }}
+                  items={DEMO_TESTIMONIALS}
+                />
+              </DesireRight>
+            </div>
+            <div className="self-start md:order-1 md:sticky md:top-24">
+              <p className="mb-6 text-sm font-medium uppercase tracking-wide text-accent">Why it exists</p>
               <h2 className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold">
                 Built like a tool.
                 <br />
@@ -106,28 +132,6 @@ export default function LandingPage() {
                 in build, in the open.
               </p>
             </div>
-            <DesireRight>
-              <DesireItem
-                name="Testimonial spotlight"
-                note="Rotates daily"
-                type="testimonial-spotlight"
-                config={{ ...defaultsFor(getWidget("testimonial-spotlight")!) }}
-                items={DEMO_TESTIMONIALS}
-              />
-              <DesireItem
-                name="Tip calculator"
-                note="Runs entirely in your page"
-                type="tip-calculator"
-                config={{ ...defaultsFor(getWidget("tip-calculator")!) }}
-              />
-              <DesireItem
-                name="Rating summary"
-                note="Real math, real stars"
-                type="rating-summary"
-                config={{ ...defaultsFor(getWidget("rating-summary")!) }}
-                items={DEMO_TESTIMONIALS}
-              />
-            </DesireRight>
           </div>
         </section>
 
