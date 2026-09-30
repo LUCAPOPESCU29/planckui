@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
+import { SiteSearch } from "./site-search";
 
 export function Wordmark({ size = "base" }: { size?: "base" | "lg" }) {
   return (
@@ -38,6 +39,7 @@ export function SiteNav() {
           ))}
         </div>
         <ThemeToggle />
+        <SiteSearch />
         <Link href="/dashboard" className="btn btn-primary rounded-full">
           Open app
         </Link>
