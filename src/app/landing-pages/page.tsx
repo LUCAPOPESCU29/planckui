@@ -41,7 +41,7 @@ const CAT_LABEL: Record<string, string> = {
 };
 
 function MiniPreview({ t, dark }: { t: LandingTemplate; dark: boolean }) {
-  const accent = ACCENT[t.category] ?? "#22707e";
+  const accent = t.accent ?? ACCENT[t.category] ?? "#22707e";
   const p = dark
     ? {
         bg: `color-mix(in oklab, ${t.pal.bg} 16%, #0b0d10)`,
@@ -104,8 +104,8 @@ export default function LandingPagesPage() {
             Landing pages. {LANDING_TEMPLATES.length} of them.
           </h1>
           <p className="mt-5 max-w-2xl text-[17px] leading-relaxed text-ink-2">
-            Twenty Apple originals and thirty-five more across editorial, Swiss, dark-cinematic,
-            warm, plain-text and brutalist families — every one a full live page with its own
+            Twenty-eight Apple originals and seventy-two more across editorial, Swiss, dark-
+            cinematic, warm, plain-text, brutalist and petrol-mint families — every one a full live page with its own
             palette, type and copy. Click through and read them like sites.
           </p>
           <div className="mt-7 flex flex-wrap gap-2">

@@ -62,8 +62,8 @@ function CTA({ t, label, filled }: { t: LandingTemplate; label: string; filled: 
       style={{
         display: "inline-block",
         background: filled ? t.pal.ink : "transparent",
-        color: filled ? t.pal.bg : ACCENT[t.category] ?? "#22707e",
-        border: filled ? "1px solid transparent" : `1px solid color-mix(in oklab, ${ACCENT[t.category] ?? "#22707e"} 55%, transparent)`,
+        color: filled ? t.pal.bg : t.accent ?? ACCENT[t.category] ?? "#22707e",
+        border: filled ? "1px solid transparent" : `1px solid color-mix(in oklab, ${t.accent ?? ACCENT[t.category] ?? "#22707e"} 55%, transparent)`,
         borderRadius: t.category === "apple" ? 999 : t.radius ? Math.min(t.radius, 12) : 8,
         padding: "11px 24px",
         font: "inherit",
@@ -80,16 +80,16 @@ function CTA({ t, label, filled }: { t: LandingTemplate; label: string; filled: 
 function Hero({ t }: { t: LandingTemplate }) {
   const glow =
     t.category === "apple" || t.category === "dark" || t.category === "gradient"
-      ? `radial-gradient(60% 90% at 50% -10%, color-mix(in oklab, ${ACCENT[t.category] ?? "#22707e"} 22%, transparent), transparent 70%)`
+      ? `radial-gradient(60% 90% at 50% -10%, color-mix(in oklab, ${t.accent ?? ACCENT[t.category] ?? "#22707e"} 22%, transparent), transparent 70%)`
       : t.category === "brutal"
       ? "none"
-      : `radial-gradient(50% 80% at 70% 0%, color-mix(in oklab, ${ACCENT[t.category] ?? "#22707e"} 12%, transparent), transparent 70%)`;
+      : `radial-gradient(50% 80% at 70% 0%, color-mix(in oklab, ${t.accent ?? ACCENT[t.category] ?? "#22707e"} 12%, transparent), transparent 70%)`;
   const centered = t.heroLayout === "center";
   return (
     <div style={{ position: "relative", overflow: "hidden", padding: centered ? "88px 32px 72px" : "88px 32px 64px", textAlign: centered ? "center" : "left" }}>
       {glow !== "none" && <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: glow, pointerEvents: "none" }} />}
       <div style={{ position: "relative", maxWidth: centered ? 720 : 900, margin: "0 auto" }}>
-        <p style={{ margin: 0, fontFamily: "ui-monospace, monospace", fontSize: 11.5, letterSpacing: "0.18em", color: ACCENT[t.category] ?? "#22707e" }}>
+        <p style={{ margin: 0, fontFamily: "ui-monospace, monospace", fontSize: 11.5, letterSpacing: "0.18em", color: t.accent ?? ACCENT[t.category] ?? "#22707e" }}>
           {t.kicker}
         </p>
         <h1
