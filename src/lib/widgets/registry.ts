@@ -1,4 +1,10 @@
 import type { CategoryId, ControlDef, WidgetDef, WidgetConfig } from "./types";
+import { META as MONEY2_META } from "./renderers/tools-money2";
+import { metaA } from "./renderers/tools-formulas-a";
+import { metaB } from "./renderers/tools-formulas-b";
+import { metaPlayA } from "./renderers/tools-play-a";
+import { metaPlayB } from "./renderers/tools-play-b";
+import { metaPlayC } from "./renderers/tools-play-c";
 
 /* ---------------------------------------------------------------- helpers */
 
@@ -845,6 +851,11 @@ export const WIDGETS: WidgetDef[] = [
   live("ap-calwidget", "Apple · Calendar", "apple", "Today's schedule with colored event bars.", { defaults: { text: "Today" }, controls: base(TEXT("Title")) }),
   live("ap-battery", "Apple · Batteries", "apple", "Device battery rings for iPhone, Watch and AirPods.", { defaults: { text: "Batteries" }, controls: base(TEXT("Title")) }),
   live("ap-screentime", "Apple · Screen Time", "apple", "Category time breakdown with the daily average.", { defaults: { text: "Screen Time" }, controls: base(TEXT("Title")) }),
+
+  /* ---- 162 tool expansion: money, formulas and interactives (data-driven) ---- */
+  ...[MONEY2_META, metaA, metaB, metaPlayA, metaPlayB, metaPlayC]
+    .flat()
+    .map((t) => live(t.id, t.name, (t.cat === "fun" ? "tools" : t.cat) as CategoryId, t.blurb, { defaults: {}, controls: base() })),
 ];
 
 export const LIVE_WIDGETS = WIDGETS.filter((w) => w.status === "live");

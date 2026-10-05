@@ -28,6 +28,12 @@ import * as toolsMore from "./tools-more";
 import * as healthTools from "./tools-health";
 import * as convertTools from "./tools-convert";
 import * as funTools from "./tools-fun";
+import { renderers as money2Renderers } from "./tools-money2";
+import { renderersA } from "./tools-formulas-a";
+import { renderersB } from "./tools-formulas-b";
+import { renderersPlayA } from "./tools-play-a";
+import { renderersPlayB } from "./tools-play-b";
+import { renderersPlayC } from "./tools-play-c";
 
 
 export type Renderer = (
@@ -344,6 +350,14 @@ export const RENDERERS: Record<string, Renderer> = {
   ...MAC_RENDERERS,
   ...MACOS_DOCK_RENDERERS,
   ...APPLE_RENDERERS,
+
+  /* ---- 162 tool expansion: money, formulas and interactives ---- */
+  ...money2Renderers,
+  ...renderersA,
+  ...renderersB,
+  ...renderersPlayA,
+  ...renderersPlayB,
+  ...renderersPlayC,
 };
 
 /* Form widgets embed as iframes (camera access, their own document, their own

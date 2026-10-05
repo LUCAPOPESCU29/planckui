@@ -90,7 +90,7 @@ export function MktgSpotlight() {
 /* Mktg 04 */
 export function MktgStats() {
   const stats = [
-    ["398", "widgets in the catalog"],
+    ["590", "widgets in the catalog"],
     ["12,400+", "teams embedding"],
     ["99.98%", "embed uptime"],
     ["$0", "today, tomorrow, forever"],
@@ -203,7 +203,7 @@ export function MktgBlog() {
 /* Mktg 09 */
 export function MktgPricingCompare() {
   const rows: Array<[string, boolean, boolean]> = [
-    ["All 398 widgets", true, true],
+    ["All 590 widgets", true, true],
     ["Unlimited embeds", true, true],
     ["Badge removal", false, true],
     ["Custom domains", false, true],
@@ -296,7 +296,7 @@ export function MktgAvatarStack() {
 /* Mktg 12 */
 export function MktgHowItWorks() {
   const steps = [
-    { t: "Pick a widget", d: "Browse 398 live previews. Everything you see is the real embed." },
+    { t: "Pick a widget", d: "Browse 590 live previews. Everything you see is the real embed." },
     { t: "Point it at your data", d: "Connect a collection, paste items or import a CSV. No schema, no setup." },
     { t: "Paste one line", d: "A single script tag, any stack. It renders in a shadow root and never fights your CSS." },
   ];

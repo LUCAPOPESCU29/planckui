@@ -81,6 +81,54 @@ export function badgeWrap(c: WidgetConfig): string {
   );
 }
 
+/* Interactive play kit — counters, pads, timers, mini-games. Same soft-depth
+   system: filled quiet surfaces, ink primary buttons, press scale. */
+export const PLAY_CSS = `
+.plk-big { font-size: 58px; font-weight: 700; letter-spacing: -0.04em; text-align: center; font-variant-numeric: tabular-nums; color: var(--w-ink); margin: 4px 0 18px; }
+.plk-btnrow { display: flex; gap: 10px; margin-top: 4px; }
+.plk-btn2 {
+  flex: 1; border: 1px solid color-mix(in oklab, var(--w-ink) 8%, var(--w-line));
+  background: var(--w-bg); color: var(--w-ink);
+  font: inherit; font-weight: 600; font-size: 14.5px; cursor: pointer;
+  padding: 12px 14px; border-radius: calc(var(--w-radius) + 0px);
+  transition: background-color 180ms cubic-bezier(0.16,1,0.3,1), border-color 180ms cubic-bezier(0.16,1,0.3,1), transform 140ms cubic-bezier(0.16,1,0.3,1);
+}
+.plk-btn2:hover { border-color: color-mix(in oklab, var(--w-ink) 20%, var(--w-line)); }
+.plk-btn2:active { transform: scale(0.97); }
+.plk-btn2.pri { background: var(--w-ink); color: var(--w-bg); border-color: transparent; }
+.plk-btn2.pri:hover { background: color-mix(in oklab, var(--w-ink) 88%, var(--w-accent)); }
+.plk-status { text-align: center; font-size: 14px; color: var(--w-muted); margin-top: 16px; min-height: 20px; }
+.plk-status b { color: var(--w-ink); font-weight: 650; }
+.plk-padgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.plk-pad {
+  aspect-ratio: 1.15; border-radius: calc(var(--w-radius) + 2px);
+  border: 1px solid color-mix(in oklab, var(--w-ink) 8%, var(--w-line));
+  background: var(--w-bg); color: var(--w-ink); font: inherit; font-weight: 600; font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform 110ms cubic-bezier(0.16,1,0.3,1), background-color 110ms;
+}
+.plk-pad:active { transform: scale(0.93); background: color-mix(in oklab, var(--w-accent) 12%, var(--w-bg)); }
+.plk-score { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.plk-score > div { background: var(--w-bg); border-radius: calc(var(--w-radius) + 2px); padding: 14px; text-align: center; }
+.plk-score .n { font-size: 30px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.plk-score .l { font-size: 12.5px; font-weight: 500; color: var(--w-muted); margin-top: 2px; }
+.plk-bar { height: 6px; border-radius: 999px; background: color-mix(in oklab, var(--w-ink) 8%, var(--w-line)); overflow: hidden; margin: 10px 0 6px; }
+.plk-bar i { display: block; height: 100%; border-radius: 999px; background: var(--w-accent); transition: width 240ms cubic-bezier(0.16,1,0.3,1); }
+`;
+
+/* Web Audio helper: lazily creates one context per widget and exposes tone(). */
+export function jsAudio(): string {
+  return (
+    "var AC=window.AudioContext||window.webkitAudioContext,ac=null;" +
+    "function ACc(){if(!ac)ac=new AC();if(ac.state==='suspended')ac.resume();return ac}" +
+    "function tone(f,d,t,v){var a=ACc(),o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.type=t||'sine';" +
+    "g.gain.setValueAtTime(0.0001,a.currentTime);g.gain.exponentialRampToValueAtTime(v||0.18,a.currentTime+0.012);" +
+    "g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+d);o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+d)}"
+  );
+}
+
+export const fieldRowLabel = fieldRow;
+
 export function platformMonogram(letter: string): string {
   return (
     '<span class="plk-pm" aria-hidden="true">' + esc(letter.charAt(0).toUpperCase()) + "</span>"

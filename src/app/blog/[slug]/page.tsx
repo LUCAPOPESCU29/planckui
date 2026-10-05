@@ -78,7 +78,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <div className="mt-14 rounded-[14px] border border-line bg-[var(--surface-2)] p-6">
         <p className="text-sm leading-relaxed text-ink-2">
           Everything in this post is live on the site —{" "}
-          <Link href="/gallery" className="font-medium text-[var(--accent)]">398 widgets</Link> and{" "}
+          <Link href="/gallery" className="font-medium text-[var(--accent)]">590 widgets</Link> and{" "}
           <Link href="/blocks" className="font-medium text-[var(--accent)]">55 copy-paste blocks</Link>, all free,
           no email asked.
         </p>

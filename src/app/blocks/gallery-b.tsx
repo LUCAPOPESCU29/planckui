@@ -217,7 +217,7 @@ export function AppEmpty() {
 export function AppOnboarding() {
   const steps = [
     { t: "Create your workspace", d: "Done — welcome aboard", state: "done" },
-    { t: "Embed your first widget", d: "In progress — pick from 398", state: "active" },
+    { t: "Embed your first widget", d: "In progress — pick from 590", state: "active" },
     { t: "Invite your team", d: "Unlocks after your first embed", state: "todo" },
   ];
   return (
@@ -336,7 +336,7 @@ export function AppFilters() {
         ))}
         <span className="flex-1" />
         <span className="text-[13px] text-ink-3">
-          <b className="font-semibold text-ink tabular-nums">{[398, 12, 34, 18, 24][active]}</b> widgets
+          <b className="font-semibold text-ink tabular-nums">{[590, 12, 34, 18, 24][active]}</b> widgets
         </span>
       </div>
     </div>

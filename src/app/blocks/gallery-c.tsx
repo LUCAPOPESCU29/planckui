@@ -71,7 +71,7 @@ export function NightTiles() {
 /* Night 03 */
 export function NightMetrics() {
   const stats = [
-    ["398", "live widgets"],
+    ["590", "live widgets"],
     ["9 KB", "embed script"],
     ["312 ms", "median render"],
     ["0", "tracking calls"],
@@ -174,7 +174,7 @@ export function NightTerminal() {
 
 /* Night 07 — single pricing card */
 export function NightPricing() {
-  const feats = ["All 398 widgets", "Badge removal", "Custom domain embeds", "White-label exports"];
+  const feats = ["All 590 widgets", "Badge removal", "Custom domain embeds", "White-label exports"];
   return (
     <div style={{ display: "flex", justifyContent: "center", padding: "20px 0" }}>
       <div style={{ width: "100%", maxWidth: 360, background: K.card, border: `1px solid ${K.line}`, borderRadius: 20, padding: 26 }}>
@@ -284,7 +284,7 @@ export function NightCTA() {
           Ship your night build.
         </h3>
         <p style={{ margin: "12px auto 0", maxWidth: 380, fontSize: 14.5, lineHeight: 1.6, color: K.sub }}>
-          Everything on this page — dark blocks, light blocks, 398 widgets — is
+          Everything on this page — dark blocks, light blocks, 590 widgets — is
           free to paste before sunrise.
         </p>
         <div style={{ marginTop: 24, display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>

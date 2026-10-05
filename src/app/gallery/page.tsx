@@ -5,7 +5,7 @@ import { WIDGETS } from "@/lib/widgets/registry";
 export const metadata = {
   title: "Widget catalog — all free",
   description:
-    "160+ free embeddable widgets for any website: testimonials, reviews, countdowns, forms, calculators and more. Live previews, honest status.",
+    "590+ free embeddable widgets for any website: testimonials, reviews, countdowns, forms, calculators and more. Live previews, honest status.",
 };
 
 export default function GalleryPage() {

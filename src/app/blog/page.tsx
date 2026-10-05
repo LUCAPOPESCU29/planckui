@@ -47,7 +47,7 @@ export default function BlogIndex() {
         <p className="text-sm leading-relaxed text-ink-2">
           Prefer the short version? Everything above ships as{" "}
           <Link href="/blocks" className="font-medium text-[var(--accent)]">copy-paste blocks</Link> and{" "}
-          <Link href="/gallery" className="font-medium text-[var(--accent)]">398 free widgets</Link> — no
+          <Link href="/gallery" className="font-medium text-[var(--accent)]">590 free widgets</Link> — no
           email asked.
         </p>
       </div>
