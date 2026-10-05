@@ -103,7 +103,7 @@ export function widgetCopy(def: WidgetDef): WidgetCopy {
   const useCase = CATEGORY_ANGLE[def.category]?.useCase ?? CATEGORY_ANGLE.utility.useCase;
 
   const whatIs = [
-    `${name} is one of 290+ free widgets on PlanckUi. ${def.blurb} ${angle}`,
+    `${name} is one of 590+ free widgets on PlanckUi. ${def.blurb} ${angle}`,
     useCase,
     `Everything is rendered in an isolated shadow DOM, so it can never conflict with your site's own styles — and at a few kilobytes, it won't move your page speed.`,
   ];

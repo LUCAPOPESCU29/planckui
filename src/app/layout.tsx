@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     template: "%s · PlanckUi",
   },
   description:
-    "Collect and show testimonials, reviews, social feeds and more. 290+ free widgets for any website. No credit card. No limits. Just paste it.",
+    "Collect and show testimonials, reviews, social feeds and more. 590+ free widgets for any website. No credit card. No limits. Just paste it.",
   verification: {
     google: "XIry2rPCBglFdAN7t-QK_NcjoK3Qb5TZdvdMILdn3CI",
   },

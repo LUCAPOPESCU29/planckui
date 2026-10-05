@@ -5,11 +5,11 @@ import { SiteFooter, SiteNav } from "@/components/SiteChrome";
 export const metadata: Metadata = {
   title: "PlanckUi vs Elfsight — Free vs $15–40/month (2026)",
   description:
-    "Elfsight charges $15–40/month for website widgets. PlanckUi gives you 290+ copy-paste widgets — testimonials, forms, docks — free forever, no signup, no watermark. Full comparison.",
+    "Elfsight charges $15–40/month for website widgets. PlanckUi gives you 590+ copy-paste widgets — testimonials, forms, docks — free forever, no signup, no watermark. Full comparison.",
   alternates: { canonical: "/vs/elfsight" },
   openGraph: {
     title: "PlanckUi vs Elfsight — Free vs $15–40/month",
-    description: "290+ copy-paste widgets, free forever, no signup. Full 2026 comparison against Elfsight's pricing and limits.",
+    description: "590+ copy-paste widgets, free forever, no signup. Full 2026 comparison against Elfsight's pricing and limits.",
     url: "/vs/elfsight",
     siteName: "PlanckUi",
     type: "article",
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "PlanckUi vs Elfsight — Free vs $15–40/month",
-    description: "290+ copy-paste widgets, free forever, no signup.",
+    description: "590+ copy-paste widgets, free forever, no signup.",
   },
 };
 
@@ -28,7 +28,7 @@ const ROWS: [string, string, string][] = [
   ["Price", "$0 — every widget, forever", "$15–40+/month for most usable widgets"],
   ["Signup required", "No — copy the HTML and go", "Yes — account + widget builder"],
   ["Watermark", "Never", "Removed on paid plans"],
-  ["Widget catalog", "290+ (testimonials, forms, docks, social, commerce)", "200+ (largest paid catalog)"],
+  ["Widget catalog", "590+ (testimonials, forms, docks, social, commerce)", "200+ (largest paid catalog)"],
   ["Customization", "Full editor: colors, fonts, radius, shadows, dark mode", "Per-widget editors, deeper on higher tiers"],
   ["Pageviews limit", "Unlimited", "Capped per plan, overage = upgrade"],
   ["How it embeds", "Self-contained HTML snippet or script tag", "Script tag, per-widget"],
@@ -118,7 +118,7 @@ export default function VsElfsightPage() {
           </p>
           <p className="mt-3">
             You also get a full library beyond testimonials — forms, social cards, platform-branded embeds
-            with real logos, macOS-style docks, and 290+ more — all under the same $0.
+            with real logos, macOS-style docks, and 590+ more — all under the same $0.
           </p>
           <h2 className="mt-8 font-display text-xl font-semibold text-ink">Try it in 60 seconds</h2>
           <p className="mt-3">
@@ -133,7 +133,7 @@ export default function VsElfsightPage() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href="/gallery" className="btn btn-primary">
-            Browse 290+ free widgets
+            Browse 590+ free widgets
           </Link>
           <Link href="/gallery/wall-of-love" className="btn btn-ghost">
             Start with a Wall of Love

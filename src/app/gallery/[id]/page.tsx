@@ -10,7 +10,7 @@ import { widgetCopy } from "@/lib/widget-copy";
 /* Widget detail pages — the programmatic SEO core. One page = one
    "free <widget> for website" query, with a live demo (proprietary content),
    full on-page copy, FAQ + SoftwareApplication schema, and copy-HTML export.
-   All 290+ pages prerender at build time. */
+   All 590+ pages prerender at build time. */
 
 export function generateStaticParams() {
   return LIVE_WIDGETS.map((w) => ({ id: w.id }));
@@ -180,7 +180,7 @@ export default async function WidgetPage({ params }: { params: Promise<{ id: str
               ))}
             </ul>
             <p className="mt-4 text-sm text-ink-3">
-              Browse the <Link href="/gallery" className="text-accent hover:text-accent-strong">full catalog of 290+ free widgets</Link>.
+              Browse the <Link href="/gallery" className="text-accent hover:text-accent-strong">full catalog of 590+ free widgets</Link>.
             </p>
           </section>
         )}
